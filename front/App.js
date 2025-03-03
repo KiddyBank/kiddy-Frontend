@@ -1,21 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import axios from 'axios';
+import React from 'react';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import ChildHomePage from './src/screens/ChildHomePage';
 
-const App = () => {
-    const [message, setMessage] = useState('טוען...');
-    const SERVER_URL = 'http://10.0.2.2:3000'; // ל-Android Emulator
+const Stack = createStackNavigator();
 
-    useEffect(() => {
-        axios.get(`${SERVER_URL}/`)
-            .then(response => setMessage(response.data.message))
-            .catch(error => setMessage('שגיאה בחיבור לשרת'));
-    }, []);
-
+const HomeScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>{message}</Text>
+            <Text style={styles.text}>Home Screen</Text>
+            <Button title="Go to Child Home" onPress={() => navigation.navigate('ChildHome')} />
         </View>
+    );
+};
+
+const App = () => {
+    return (
+        <NavigationContainer>
+            <Stack.Navigator initialRouteName="Home">
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="ChildHome" component={ChildHomePage} />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 };
 
@@ -24,7 +31,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
     },
     text: {
         fontSize: 20,

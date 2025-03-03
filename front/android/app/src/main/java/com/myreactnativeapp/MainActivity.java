@@ -1,6 +1,8 @@
 package com.myreactnativeapp;
 
 import com.facebook.react.ReactActivity;
+import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
+
 
 public class MainActivity extends ReactActivity {
 
