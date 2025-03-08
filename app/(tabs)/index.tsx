@@ -1,74 +1,74 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, Image, FlatList, ScrollView, TouchableOpacity, ProgressBarAndroid } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import styles from '../styles/main-kid.styles';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const MainKidScreen = () => {
+  const balance = 1000;
 
-export default function HomeScreen() {
+  const transactions = [
+    { id: '1', name: 'רולדין', category: 'אוכל', amount: -280, type: 'expense' },
+    { id: '2', name: 'דמי כיס אוקטובר', category: 'הכנסה', amount: 1200, type: 'income' },
+    { id: '3', name: 'פלייסטיישן', category: 'בידור', amount: -480, type: 'expense' },
+  ];
+
+  const tasks = [
+    { id: '1', name: 'להוציא את הכלב', reward: 5, status: 'done' },
+    { id: '2', name: 'שיעורי בית עם בטי', reward: 7, status: 'done' },
+    { id: '3', name: 'משחק שעה עם לקסי', reward: 3, status: 'done' },
+  ];
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
-}
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
+        <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
+        <Text style={styles.balanceLabel}>היתרה שלי</Text>
+      </View>
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+      <View style={styles.transactionsContainer}>
+        <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
+        {transactions.map((item) => (
+          <View key={item.id} style={styles.transactionItem}>
+            <Ionicons
+              name={item.type === 'income' ? 'add-circle' : 'remove-circle'}
+              size={24}
+              color={item.type === 'income' ? 'green' : 'red'}
+            />
+            <View style={styles.transactionDetails}>
+              <Text style={styles.transactionName}>{item.name}</Text>
+              <Text style={styles.transactionCategory}>{item.category}</Text>
+            </View>
+            <Text style={[styles.transactionAmount, { color: item.type === 'income' ? 'green' : 'red' }]}>
+              {item.amount.toLocaleString()} ₪
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.tasksContainer}>
+        <Text style={styles.sectionTitle}>משימות להשלמה</Text>
+        <FlatList
+          data={tasks}
+          keyExtractor={(item) => item.id}
+          horizontal
+          renderItem={({ item }) => (
+            <View style={styles.taskItem}>
+              <Text style={styles.taskText}>{item.name}</Text>
+              <Text style={styles.taskReward}>{item.reward} ₪</Text>
+              <TouchableOpacity style={styles.taskButton}>
+                <Text style={styles.taskButtonText}>בוצע</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      </View>
+
+      <TouchableOpacity style={styles.payButton}>
+        <Text style={styles.payButtonText}>שלם</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+};
+
+export default MainKidScreen;

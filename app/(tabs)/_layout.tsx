@@ -26,27 +26,42 @@ export default function TabLayout() {
           default: {},
         }),
       }}>
-      <Tabs.Screen
-        name="index"
+       <Tabs.Screen
+        name="savings"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'חיסכון',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gamecontroller.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="games"
         options={{
-          title: 'Explore',
+          title: 'משחקים',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gamecontroller.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="nfc-pay"
+        options={{
+          title: 'תשלום',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="welcome"
+        name="index"
         options={{
-          title: 'ron',
+          title: 'ראשי',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'הגדרות',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
     </Tabs>
   );
 }
+

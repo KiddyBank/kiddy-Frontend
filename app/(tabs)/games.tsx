@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function WelcomeScreen() {
+export default function GameScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>שלום, הגעת לאפליקציה שלי!</Text>
+      <Text style={styles.text}>שלום, הגעת למסך משחקים!</Text>
     </View>
   );
 }
