@@ -30,7 +30,7 @@ export default function TabLayout() {
         name="savings"
         options={{
           title: 'חיסכון',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gamecontroller.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="piggybank.fill" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -44,24 +44,25 @@ export default function TabLayout() {
         name="nfc-pay"
         options={{
           title: 'תשלום',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="creditcard.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="index"
         options={{
           title: 'ראשי',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: 'הגדרות',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
         }}
       />
     </Tabs>
   );
 }
+
 

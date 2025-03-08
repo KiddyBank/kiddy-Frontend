@@ -13,9 +13,9 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'piggyBank.fill': 'savings',         
+  'piggybank.fill': 'savings',         
   'gamecontroller.fill': 'sports-esports',  
-  'credit-card.fill': 'payment',        
+  'creditcard.fill': 'payment',        
   'gearshape.fill': 'settings',    
 } as Partial<
   Record<
@@ -37,11 +37,11 @@ export function IconSymbol({
   color,
   style,
 }: {
-  name: IconSymbolName;
+  name: IconSymbolName | string;
   size?: number;
   color: string | OpaqueColorValue;
   style?: StyleProp<ViewStyle>;
   weight?: SymbolWeight;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} />;
+  return <MaterialIcons color={color} size={size} name={MAPPING[name as IconSymbolName]} />;
 }
