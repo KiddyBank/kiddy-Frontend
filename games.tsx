@@ -137,7 +137,7 @@ const videoTypesChoices: VideoTypeChoice[] = [
   {displayText: "צריכה נבונה", videos: wiseConsumerVideos},
   {displayText: "הלוואות,בנק ופיקדונות", videos: moneySystemsVideos},
   {displayText: "התנהלות כלכלית נכונה", videos: financialManagementVideos},
-  {displayText: "התנהלות עבודה ומיסים", videos: jobAndTaxesVideos},
+  {displayText: "עבודה ומיסים", videos: jobAndTaxesVideos},
 ];
 
 async function openLink(url: string) {
