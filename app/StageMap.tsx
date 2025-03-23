@@ -2,7 +2,9 @@ import React from 'react';
 import { View, Text, ImageBackground, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Svg, Path, Circle, Text as SvgText } from 'react-native-svg';
-import styles from '../styles/stage-map.styles';
+import styles from './styles/stage-map.styles';
+
+
 
 const { height, width } = Dimensions.get("window");
 
@@ -35,7 +37,7 @@ const StageMap = () => {
             {/* רקע קבוע בלי גלילה, מסודר כך שכל השלבים ייכנסו למסך */}
             <ImageBackground
                 style={styles.mapBackground}
-                source={require('../../assets/images/colorful-background.png')} // תמונת רקע צבעונית
+                source={require('../assets/images/colorful-background.png')} // תמונת רקע צבעונית
             >
                 <Svg height={height} width={width}>
                     {/* שביל מסודר כך שכל השלבים יהיו במסך */}
