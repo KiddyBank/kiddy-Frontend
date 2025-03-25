@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
-
+import axios from 'axios';
 type Transaction = {
   transaction_id: string;
   type: string;
@@ -32,7 +31,7 @@ const MainKidScreen = () => {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const response = await axios.get('http://10.100.102.10:3000/users/balance');
+        const response = await axios.get('http://localhost:3000/users/balance');
         setBalance(response.data.balance);
       } catch (error) {
         console.error("❌ Failed to fetch balance:", error);
@@ -47,7 +46,7 @@ const MainKidScreen = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await axios.get(`http://10.100.102.10:3000/users/transactions`);
+        const response = await axios.get(`http://localhost:3000/users/transactions`);
         setTransactions(response.data);
       } catch (error) {
         console.error("❌ Failed to fetch transactions:", error);
@@ -62,7 +61,7 @@ const MainKidScreen = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get(`http://10.100.102.10:3000/users/tasks`);
+        const response = await axios.get(`http://localhost:3000/users/tasks`);
         setTasks(response.data);
       } catch (error) {
         console.error("❌ Failed to fetch tasks:", error);

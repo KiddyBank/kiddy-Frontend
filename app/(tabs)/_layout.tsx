@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
@@ -7,9 +7,11 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { AccountContext, AccountType } from '../_layout';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const accountType = useContext(AccountContext)
 
   return (
     <Tabs
@@ -36,6 +38,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="games"
         options={{
+          href: accountType === AccountType.KID ? "/games" : null,
           title: 'משחקים',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="gamecontroller.fill" color={color} />,
         }}
@@ -50,6 +53,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          href: accountType === AccountType.KID ? "/" : null,
+          title: 'ראשי',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="parent"
+        options={{
+          href: accountType === AccountType.PARENT ? "/parent" : null,
           title: 'ראשי',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
