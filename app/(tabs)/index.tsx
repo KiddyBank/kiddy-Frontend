@@ -1,27 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { View, Text, Image, FlatList, ScrollView, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, Image, FlatList, ScrollView, TouchableOpacity, ProgressBarAndroid } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
 
-
 const MainKidScreen = () => {
-  const [balance, setBalance] = useState(0);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const response = await axios.get('http://10.100.102.10:3000/users/balance');
-        setBalance(response.data.balance);
-      } catch (error) {
-        console.error("❌ Failed to fetch balance:", error);
-        setError('שגיאה בשליפת יתרה 😢');
-      }
-    };
-
-    fetchBalance();
-  }, []);
+  const balance = 1000;
 
   const transactions = [
     { id: '1', name: 'רולדין', category: 'אוכל', amount: -280, type: 'expense' },
@@ -41,7 +24,6 @@ const MainKidScreen = () => {
         <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
         <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
         <Text style={styles.balanceLabel}>היתרה שלי</Text>
-        {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
       </View>
 
       <View style={styles.transactionsContainer}>
@@ -83,7 +65,7 @@ const MainKidScreen = () => {
       </View>
 
       <TouchableOpacity style={styles.payButton}>
-        <Text style={styles.payButtonText}>בקשה מההורה לפתוח תשלום</Text>
+        <Text style={styles.payButtonText}>שלם</Text>
       </TouchableOpacity>
     </ScrollView>
   );
