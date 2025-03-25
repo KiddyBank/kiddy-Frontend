@@ -2,18 +2,18 @@ import React from 'react';
 import { View, Text, ImageBackground, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Svg, Path, Circle, Text as SvgText } from 'react-native-svg';
-import styles from '../styles/stage-map.styles';
+import styles from './styles/stage-map.styles';
 
 const { height, width } = Dimensions.get("window");
 
-// ✅ קירוב שלב 6 לשלב 5 כך שלא ייחתך
+
 const stages = [
     { id: 1, cx: width * 0.2, cy: height * 0.88, completed: true },
     { id: 2, cx: width * 0.35, cy: height * 0.72, completed: true },
     { id: 3, cx: width * 0.5, cy: height * 0.56, completed: false },
     { id: 4, cx: width * 0.65, cy: height * 0.40, completed: false },
     { id: 5, cx: width * 0.50, cy: height * 0.24, completed: false },
-    { id: 6, cx: width * 0.40, cy: height * 0.14, completed: false }, // 📌 קרבנו את שלב 6 טיפה לשלב 5
+    { id: 6, cx: width * 0.40, cy: height * 0.14, completed: false },
 ];
 
 const StageMap = () => {
@@ -35,7 +35,7 @@ const StageMap = () => {
             {/* רקע קבוע בלי גלילה, מסודר כך שכל השלבים ייכנסו למסך */}
             <ImageBackground
                 style={styles.mapBackground}
-                source={require('../../assets/images/colorful-background.png')} // תמונת רקע צבעונית
+                source={require('../assets/images/colorful-background.png')} // תמונת רקע צבעונית
             >
                 <Svg height={height} width={width}>
                     {/* שביל מסודר כך שכל השלבים יהיו במסך */}
