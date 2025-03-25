@@ -102,6 +102,46 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+
+  nfcContainer: {
+    padding: 20,
+  },
+
+  transactionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  transactionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+
+  toggleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+  },
+  approved: {
+    backgroundColor: '#4CAF50',
+  },
+  pending: {
+    backgroundColor: '#FFC107',
+  },
+  toggleButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  }
+
 });
 
 export default styles;

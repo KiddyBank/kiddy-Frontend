@@ -18,14 +18,26 @@ type TaskType = {
   task_status: string;
 };
 
+type NfcTransaction = {
+  transaction_id: string;
+  description: string;
+  amount: number;
+  status: 'pending' | 'approved';
+};
+
+
 const MainKidScreen = () => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [nfcTransactions, setNfcTransactions] = useState<NfcTransaction[]>([]);
+
 
   const [error, setError] = useState('');
   const [transactionsError, setTransactionsError] = useState('');
   const [tasksError, setTasksError] = useState('');
+
+  
 
   // שליפת יתרה
   useEffect(() => {
@@ -56,6 +68,34 @@ const MainKidScreen = () => {
 
     fetchTransactions();
   }, []);
+
+  useEffect(() => {
+    const fetchNfcTransactions = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/child-balance/transactions');
+        setNfcTransactions(response.data);
+      } catch (error) {
+        console.error("❌ Failed to fetch NFC transactions:", error);
+        setError('שגיאה בשליפת עסקאות NFC 😢');
+      }
+    };
+
+    fetchNfcTransactions();
+  }, []);
+
+  const toggleActivation = async (transactionId: string, currentStatus: string) => {
+    try {
+      await axios.post(`http://localhost:3000/users/nfc-transactions/${transactionId}/toggle`);
+      setNfcTransactions((prev) =>
+        prev.map((txn) =>
+          txn.transaction_id === transactionId ? { ...txn, status: currentStatus === 'pending' ? 'approved' : 'pending' } : txn
+        )
+      );
+    } catch (error) {
+      console.error("❌ שגיאה בזיהוי סטטוס NFC", error);
+    }
+  };
+
 
   // שליפת משימות
   useEffect(() => {
@@ -140,6 +180,27 @@ const MainKidScreen = () => {
               />
             )}
           </View>
+
+          <View style={styles.nfcContainer}>
+            <Text style={styles.sectionTitle}>עסקאות NFC לאישור</Text>
+            {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
+            <FlatList
+              data={nfcTransactions}
+              keyExtractor={(item) => item.transaction_id}
+              renderItem={({ item }) => (
+                <View style={styles.transactionRow}>
+                  <Text style={styles.transactionText}>{item.description}</Text>
+                  <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
+                  <TouchableOpacity
+                    style={[styles.toggleButton, item.status === 'approved' ? styles.approved : styles.pending]}
+                    onPress={() => toggleActivation(item.transaction_id, item.status)}
+                  >
+                    <Text style={styles.toggleButtonText}>{item.status === 'pending' ? 'אשר' : 'בטל'}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+          </View>
         </ScrollView>
 
         <TouchableOpacity style={styles.payButton}>
@@ -148,6 +209,7 @@ const MainKidScreen = () => {
       </View>
     </SafeAreaView>
   );
+
 };
 
 export default MainKidScreen;
