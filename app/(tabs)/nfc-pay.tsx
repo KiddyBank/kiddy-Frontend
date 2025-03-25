@@ -3,10 +3,12 @@ import { View, Text, Animated, Alert, TouchableOpacity } from "react-native";
 import { Audio } from "expo-av";
 import LottieView from "lottie-react-native";
 import styles from "../styles/nfc-pay.styles";
+import { useNavigation } from "@react-navigation/native";
 
 const NFCPaymentScreen = () => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [animation] = useState(new Animated.Value(1));
+  const navigation = useNavigation();
 
   useEffect(() => {
     startAnimation();
@@ -29,13 +31,30 @@ const NFCPaymentScreen = () => {
     );
   };
 
-  const proceedPayment = () => {
-    Alert.alert("תשלום", "ממתין לקריאת כרטיס...", [{ text: "בסדר" }]);
+  const proceedPayment = async () => {
+    Alert.alert("תשלום", "ממתין לקריאת כרטיס...");
 
     setTimeout(async () => {
       setPaymentSuccess(true);
       await playSound();
-      Alert.alert("תשלום הצליח!", "כל הכבוד! התשלום בוצע בהצלחה");
+
+      try {
+        await fetch(`http://192.168.68.110:3000/child-balance/charge-one-shekel`, {
+          method: 'PATCH',
+        });
+      } catch (error) {
+        console.error("שגיאה בחיוב הארנק", error);
+      }
+
+      Alert.alert("תשלום הצליח!", "כל הכבוד! התשלום בוצע בהצלחה", [
+        {
+          text: "חזרה למסך הראשי",
+          onPress: () => {
+            setPaymentSuccess(false); // איפוס המסך
+            (navigation as any).navigate("index", { refresh: true });
+          },
+        },
+      ]);
     }, 3000);
   };
 

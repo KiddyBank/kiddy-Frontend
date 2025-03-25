@@ -1,8 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { View, Text, Image, FlatList, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  RefreshControl,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
+import { useRoute, useFocusEffect } from '@react-navigation/native';
 
 type Transaction = {
   transaction_id: string;
@@ -23,74 +33,81 @@ const MainKidScreen = () => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [error, setError] = useState('');
   const [transactionsError, setTransactionsError] = useState('');
   const [tasksError, setTasksError] = useState('');
 
-  // שליפת יתרה
-  useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const response = await axios.get('http://10.100.102.10:3000/users/balance');
-        setBalance(response.data.balance);
-      } catch (error) {
-        console.error("❌ Failed to fetch balance:", error);
-        setError('שגיאה בשליפת יתרה 😢');
-      }
-    };
+  const route = useRoute();
 
-    fetchBalance();
+  const fetchAllData = async () => {
+    try {
+      const [balanceRes, transactionsRes, tasksRes] = await Promise.all([
+        axios.get('http://192.168.68.110:3000/users/balance'),
+        axios.get('http://192.168.68.110:3000/users/transactions'),
+        axios.get('http://192.168.68.110:3000/users/tasks'),
+      ]);
+
+      setBalance(balanceRes.data.balance);
+      setTransactions(transactionsRes.data);
+      setTasks(tasksRes.data);
+
+      setError('');
+      setTransactionsError('');
+      setTasksError('');
+    } catch (error) {
+      console.error('❌ שגיאה כללית:', error);
+      setError('שגיאה בשליפת יתרה 😢');
+      setTransactionsError('שגיאה בשליפת תנועות 😢');
+      setTasksError('שגיאה בשליפת משימות 😢');
+    }
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchAllData().finally(() => setRefreshing(false));
   }, []);
 
-  // שליפת תנועות
+  useFocusEffect(
+    useCallback(() => {
+      fetchAllData();
+    }, [])
+  );
+
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const response = await axios.get(`http://10.100.102.10:3000/users/transactions`);
-        setTransactions(response.data);
-      } catch (error) {
-        console.error("❌ Failed to fetch transactions:", error);
-        setTransactionsError('שגיאה בשליפת תנועות 😢');
-      }
-    };
+    if ((route.params as any)?.refresh) {
+      fetchAllData();
+    }
+  }, [route.params]);
 
-    fetchTransactions();
-  }, []);
-
-  // שליפת משימות
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await axios.get(`http://10.100.102.10:3000/users/tasks`);
-        setTasks(response.data);
-      } catch (error) {
-        console.error("❌ Failed to fetch tasks:", error);
-        setTasksError('שגיאה בשליפת משימות 😢');
-      }
-    };
-
-    fetchTasks();
-  }, []);
+  // פונקציה לקביעת צבע לפי סוג תנועה
+  const getTransactionColor = (type: string) => {
+    const positiveTypes = ['parent_deposit', 'goal_deposit', 'store_refund'];
+    return positiveTypes.includes(type.toLowerCase()) ? 'green' : 'red';
+  };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F5F5' }}>
-      <View style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.innerContainer}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
           <View style={styles.header}>
             <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
             <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
             <Text style={styles.balanceLabel}>היתרה שלי</Text>
-            {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
+            {error !== '' && <Text style={styles.errorText}>{error}</Text>}
           </View>
 
           <View style={styles.transactionsContainer}>
             <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
-            {transactionsError !== '' && <Text style={{ color: 'red' }}>{transactionsError}</Text>}
+            {transactionsError !== '' && <Text style={styles.errorText}>{transactionsError}</Text>}
 
             {transactions.length === 0 ? (
-              <View style={{ padding: 20, alignItems: 'center' }}>
-                <Text style={{ color: '#888', fontSize: 16, textAlign: 'center' }}>
+              <View style={styles.emptySection}>
+                <Text style={styles.emptyText}>
                   כאן יופיעו הקניות שתעשה כשתשלם בחנויות מהארנק שלך 🛍️
                 </Text>
               </View>
@@ -98,15 +115,14 @@ const MainKidScreen = () => {
               transactions.map((item) => (
                 <View key={item.transaction_id} style={styles.transactionItem}>
                   <Ionicons
-                    name={item.type === 'deposit' ? 'add-circle' : 'remove-circle'}
+                    name={getTransactionColor(item.type) === 'green' ? 'add-circle' : 'remove-circle'}
                     size={24}
-                    color={item.type === 'deposit' ? 'green' : 'red'}
+                    color={getTransactionColor(item.type)}
                   />
                   <View style={styles.transactionDetails}>
                     <Text style={styles.transactionName}>{item.description || '---'}</Text>
-                    <Text style={styles.transactionCategory}>{item.type}</Text>
                   </View>
-                  <Text style={[styles.transactionAmount, { color: item.type === 'deposit' ? 'green' : 'red' }]}>
+                  <Text style={[styles.transactionAmount, { color: getTransactionColor(item.type) }]}>
                     {item.amount.toLocaleString()} ₪
                   </Text>
                 </View>
@@ -116,11 +132,11 @@ const MainKidScreen = () => {
 
           <View style={styles.tasksContainer}>
             <Text style={styles.sectionTitle}>משימות להשלמה</Text>
-            {tasksError !== '' && <Text style={{ color: 'red' }}>{tasksError}</Text>}
+            {tasksError !== '' && <Text style={styles.errorText}>{tasksError}</Text>}
 
             {tasks.length === 0 ? (
-              <View style={{ padding: 20, alignItems: 'center' }}>
-                <Text style={{ color: '#888', fontSize: 16, textAlign: 'center' }}>
+              <View style={styles.emptySection}>
+                <Text style={styles.emptyText}>
                   כאן יופיעו המשימות שההורים יתנו לך 🎯
                 </Text>
               </View>
