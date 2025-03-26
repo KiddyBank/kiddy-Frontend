@@ -155,7 +155,40 @@ const styles = StyleSheet.create({
   toggleButtonText: {
     color: '#fff',
     fontSize: 16,
-  }
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  textInPopup: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modal: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 8,
+    width: 300,
+    alignItems: 'flex-end',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  input: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 15,
+     textAlign: 'right'
+  },
 
 });
 

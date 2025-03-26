@@ -9,10 +9,14 @@ import {
   TouchableOpacity,
   SafeAreaView,
   RefreshControl,
+  Button,
+  Modal,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
+import { TextInput } from 'react-native';
 
 type Transaction = {
   transaction_id: string;
@@ -49,7 +53,51 @@ const MainKidScreen = () => {
   const [transactionsError, setTransactionsError] = useState('');
   const [tasksError, setTasksError] = useState('');
 
+  const [showModal, setShowModal] = useState(false);
+  const [amount, setAmount] = useState('');
+  const [message, setMessage] = useState('');
+
+  // Handler to toggle the modal visibility
+  const handleButtonClick = () => {
+    setShowModal(true);
+  };
+
+  // Handler for the "Send" button click
+  const handleSendClick = async () => {
+    const data = {
+      amountToPay: amount,  // Amount to pay
+      messageToMom: message,  // Message for Mom
+    };
   
+    try {
+      const response = await axios.post('https://your-backend-url.com/endpoint', data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (response.status === 200) {
+        Alert.alert("יש! בקשת האישור נשלחה וממתינה לאישור ההורה");
+        setTimeout(() => {
+          setShowModal(false);
+        }, 3000);
+      } else {
+        Alert.alert("אוי לא! בקשת האישור לא הצליחה להשלח, אנא נסה שוב");
+        setTimeout(() => {
+          setShowModal(false);
+        }, 3000);
+        console.error('Unexpected error:', error);
+      }
+    } catch (error) {
+      console.error('Error sending data:', error);
+      Alert.alert("אוי לא! יש לנו קצת בעיות טכניות אנא נסה שוב מאוחר יותר");
+      setTimeout(() => {
+        setShowModal(false);
+      }, 3000);
+      console.error('Unexpected error:', error);
+    }
+  };
+
 
   const route = useRoute();
 
@@ -220,9 +268,47 @@ const MainKidScreen = () => {
           </View>
         </ScrollView>
 
-        <TouchableOpacity style={styles.payButton}>
+        <View>
+
+      <TouchableOpacity style={styles.payButton} onPress={handleButtonClick}>
           <Text style={styles.payButtonText}>בקש מההורים לפתוח תשלום</Text>
         </TouchableOpacity>
+
+      <Modal
+        visible={showModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={styles.overlay}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>סכום לתשלום</Text>
+
+            <Text>סכום לתשלום:</Text>
+            <TextInput
+              style={styles.input}
+              value={amount}
+              onChangeText={setAmount}
+              placeholder="הכנס סכום"
+              keyboardType="numeric"
+              textAlign="right"
+            />
+
+            <Text>הודעה לאמא:</Text>
+            <TextInput
+              style={styles.input}
+              value={message}
+              onChangeText={setMessage}
+              placeholder="הכנס הודעה"
+              multiline
+            />
+
+            <Button  color="#3F51B5" title="שלח" onPress={handleSendClick} />
+            <Button title="ביטול" color="#3F51B5" onPress={() => setShowModal(false)} />
+          </View>
+        </View>
+      </Modal>
+    </View>
       </View>
     </SafeAreaView>
   );
