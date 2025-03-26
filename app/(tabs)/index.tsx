@@ -15,8 +15,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
-import { useRoute, useFocusEffect } from '@react-navigation/native';
+
 import { TextInput } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useRoute } from '@react-navigation/native';
 
 type Transaction = {
   transaction_id: string;
@@ -46,6 +48,8 @@ const MainKidScreen = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [nfcTransactions, setNfcTransactions] = useState<NfcTransaction[]>([]);
+  const router = useRouter();
+
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -56,6 +60,10 @@ const MainKidScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
+
+  const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
+
+
 
   // Handler to toggle the modal visibility
   const handleButtonClick = () => {
@@ -69,7 +77,6 @@ const MainKidScreen = () => {
       description: message,
     };
 
-    const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
   
     try {
       const response = await axios.post('http://localhost:3000/child-balance/place-payment-request/' + childId,
@@ -107,7 +114,7 @@ const MainKidScreen = () => {
     try {
       const [balanceRes, transactionsRes, tasksRes] = await Promise.all([
         axios.get('http://127.0.0.1:3000/users/balance'),
-        axios.get('http://127.0.0.1:3000/users/transactions'),
+        axios.get('http://127.0.0.1:3000/users/transactions?transactionStatus=COMPLETED'),
         axios.get('http://127.0.0.1:3000/users/tasks'),
       ]);
 
@@ -134,7 +141,7 @@ const MainKidScreen = () => {
   useEffect(() => {
     const fetchNfcTransactions = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/users/transactions');
+        const response = await axios.get('http://localhost:3000/users/transactions?transactionStatus=APPORVED_BY_PARENT');
         setNfcTransactions(response.data);
       } catch (error) {
         console.error("❌ Failed to fetch NFC transactions:", error);
@@ -145,14 +152,11 @@ const MainKidScreen = () => {
     fetchNfcTransactions();
   }, []);
 
-  const toggleActivation = async (transactionId: string, currentStatus: string) => {
+  const toggleActivation = async (transactionId: string) => {
     try {
-      await axios.post(`http://localhost:3000/users/nfc-transactions/${transactionId}/toggle`);
-      setNfcTransactions((prev) =>
-        prev.map((txn) =>
-          txn.transaction_id === transactionId ? { ...txn, status: currentStatus === 'pending' ? 'approved' : 'pending' } : txn
-        )
-      );
+      router.navigate(`/nfc-pay?userId=${childId}&transactionId=${transactionId}`);
+
+     
     } catch (error) {
       console.error("❌ שגיאה בזיהוי סטטוס NFC", error);
     }
@@ -260,9 +264,9 @@ const MainKidScreen = () => {
                   <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
                   <TouchableOpacity
                     style={[styles.toggleButton, item.status === 'approved' ? styles.approved : styles.pending]}
-                    onPress={() => toggleActivation(item.transaction_id, item.status)}
+                    onPress={() => toggleActivation(item.transaction_id)}
                   >
-                    <Text style={styles.toggleButtonText}>{item.status === 'pending' ? 'אשר' : 'בטל'}</Text>
+                    <Text style={styles.toggleButtonText}>שלם</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -305,7 +309,7 @@ const MainKidScreen = () => {
               multiline
             />
 
-            <Button  color="#3F51B5" title="שלח" onPress={handleSendClick} />
+            <Button  color="#E9ECEF" title="שלח" onPress={handleSendClick} />
             <Button title="ביטול" color="#3F51B5" onPress={() => setShowModal(false)} />
           </View>
         </View>

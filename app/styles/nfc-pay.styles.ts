@@ -8,6 +8,16 @@ export default StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
+  payButtonSticky: {
+    position: 'absolute',
+    top: 20, // Adjust as needed to control the distance from the top
+    left: 0,
+    right: 0,
+    zIndex: 1, // Ensure it stays above other elements
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    alignItems: 'center',
+  },
   title: {
     fontSize: 26,
     fontWeight: "bold",

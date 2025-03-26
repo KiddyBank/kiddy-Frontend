@@ -15,6 +15,7 @@ export default function ParentScreen() {
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [error, setError] = useState('');
 
+
   const parentId = 'd1e5c471-d6a4-44f1-841a-a5aabef21128';
 
 
@@ -22,6 +23,9 @@ export default function ParentScreen() {
     try {
       const response = await axios.get(`http://localhost:3000/users/parents/${parentId}/children-playment-requests`);
       setPaymentRequests(response.data);
+      console.log(response
+        .data
+      )
     } catch (error) {
       console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
       setError('שגיאה בשליפת בקשות של ילדים');
@@ -30,7 +34,7 @@ export default function ParentScreen() {
 
   const approvePaymentRequest = async (transactionId: string) => {
     try {
-      await axios.post(`parents/${parentId}/accept-payment-request`, { body: transactionId });
+      await axios.post(`http://localhost:3000/users/parents/${parentId}/accept-payment-request`, { body: {transactionId: transactionId} });
       setPaymentRequests(prev => prev.filter(request => request.transaction_id !== transactionId));
     } catch (error) {
       console.error("❌ Error approving payment request", error);
