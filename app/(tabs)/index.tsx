@@ -56,9 +56,9 @@ const MainKidScreen = () => {
   const fetchAllData = async () => {
     try {
       const [balanceRes, transactionsRes, tasksRes] = await Promise.all([
-        axios.get('http://192.168.68.110:3000/users/balance'),
-        axios.get('http://192.168.68.110:3000/users/transactions'),
-        axios.get('http://192.168.68.110:3000/users/tasks'),
+        axios.get('http://127.0.0.1:3000/users/balance'),
+        axios.get('http://127.0.0.1:3000/users/transactions'),
+        axios.get('http://127.0.0.1:3000/users/tasks'),
       ]);
 
       setBalance(balanceRes.data.balance);
@@ -84,7 +84,7 @@ const MainKidScreen = () => {
   useEffect(() => {
     const fetchNfcTransactions = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/child-balance/transactions');
+        const response = await axios.get('http://localhost:3000/users/transactions');
         setNfcTransactions(response.data);
       } catch (error) {
         console.error("❌ Failed to fetch NFC transactions:", error);
