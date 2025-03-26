@@ -5,6 +5,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
+  innerContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   header: {
     backgroundColor: '#3F51B5',
     alignItems: 'center',
@@ -26,6 +32,10 @@ const styles = StyleSheet.create({
   balanceLabel: {
     fontSize: 16,
     color: 'white',
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 8,
   },
   transactionsContainer: {
     padding: 20,
@@ -51,10 +61,6 @@ const styles = StyleSheet.create({
   transactionName: {
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  transactionCategory: {
-    fontSize: 14,
-    color: 'gray',
   },
   transactionAmount: {
     fontSize: 16,
@@ -101,6 +107,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  emptySection: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#888',
+    fontSize: 16,
+    textAlign: 'center',
   },
 
   nfcContainer: {

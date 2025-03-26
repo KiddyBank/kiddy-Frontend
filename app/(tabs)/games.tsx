@@ -2,6 +2,10 @@ import React, { useRef, useState } from 'react';
 import { View, Text, Linking, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown'
 import styles from '../styles/main-kid.styles';
+import { Link } from 'expo-router';
+import { blue } from 'react-native-reanimated/lib/typescript/Colors';
+
+
 
 interface Media {
   url: string
@@ -194,6 +198,11 @@ export default function GameScreen() {
 
   return (
     <View style={pageStyles.container}>
+      <Link href="/StageMap" asChild>
+        <TouchableOpacity style={pageStyles.button}>
+          <Text style={pageStyles.buttonText}>מעבר למפת התקדמות</Text>
+        </TouchableOpacity>
+      </Link>
       <Text style={pageStyles.header}>סרטונים</Text>
       <SelectDropdown
         data={videoTypesChoices}
@@ -276,6 +285,19 @@ const pageStyles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: "#3F51B5",
+  },
+  button: {
+    width: "15%",
+    padding: 10,
+    backgroundColor: "#3F51B5",
+    borderRadius: 20,
+    display: "flex",
+    alignItems: "center"
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   gamePlayButton: {
     width: "100%",
