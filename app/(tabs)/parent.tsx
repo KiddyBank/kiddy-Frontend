@@ -3,46 +3,42 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight, FlatList, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 
-type NfcTransaction = {
+type PaymentRequest = {
   transaction_id: string;
   description: string;
   amount: number;
-  status: 'pending' | 'approved';
+  status: 'PENDING_PARENT_APPROVAL';
 };
-
 
 export default function ParentScreen() {
   const router = useRouter();
-  const [nfcTransactions, setNfcTransactions] = useState<NfcTransaction[]>([]);
+  const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [error, setError] = useState('');
 
-  // Fetch NFC Transactions from the server
-  const fetchNfcTransactions = async () => {
+  const parentId = 'd1e5c471-d6a4-44f1-841a-a5aabef21128';
+
+
+  const fetchPaymentRequests = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/users/transactions'); // Change URL to your API endpoint
-      setNfcTransactions(response.data);
+      const response = await axios.get(`http://localhost:3000/users/parents/${parentId}/children-playment-requests`);
+      setPaymentRequests(response.data);
     } catch (error) {
-      console.error('❌ Failed to fetch NFC transactions:', error);
-      setError('שגיאה בשליפת עסקאות NFC');
+      console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
+      setError('שגיאה בשליפת בקשות של ילדים');
     }
   };
 
-  // Toggle transaction approval status
-  const toggleTransactionApproval = async (transactionId: string, currentStatus: string) => {
+  const approvePaymentRequest = async (transactionId: string) => {
     try {
-      await axios.post(`http://localhost:3000/users/nfc-transactions/${transactionId}/toggle`);
-      setNfcTransactions(prev =>
-        prev.map(txn =>
-          txn.transaction_id === transactionId ? { ...txn, status: currentStatus === 'pending' ? 'approved' : 'pending' } : txn
-        )
-      );
+      await axios.post(`parents/${parentId}/accept-payment-request`, { body: transactionId });
+      setPaymentRequests(prev => prev.filter(request => request.transaction_id !== transactionId));
     } catch (error) {
-      console.error("❌ Error toggling NFC transaction status", error);
+      console.error("❌ Error approving payment request", error);
     }
   };
 
   useEffect(() => {
-    fetchNfcTransactions();
+    fetchPaymentRequests();
   }, []);
 
   const toChild = () => {
@@ -54,8 +50,6 @@ export default function ParentScreen() {
       <View style={styles.headerContainer}>
         <Text style={styles.header}>יתרות הילדים</Text>
       </View>
-
-      {/* Kids' Balances Section */}
       <View style={styles.kidsContainer}>
         <View style={styles.kid}>
           <TouchableHighlight onPress={() => toChild()}>
@@ -87,23 +81,21 @@ export default function ParentScreen() {
           </View>
         </View>
       </View>
-
-      {/* NFC Payments Awaiting Parent Approval Section */}
       <View style={styles.nfcContainer}>
-        <Text style={styles.sectionTitle}>עסקאות NFC לאישור</Text>
+        <Text style={styles.sectionTitle}>בקשות תשלום ממתינות לאישור</Text>
         {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
         <FlatList
-          data={nfcTransactions}
+          data={paymentRequests}
           keyExtractor={(item) => item.transaction_id}
           renderItem={({ item }) => (
             <View style={styles.transactionRow}>
               <Text style={styles.transactionText}>{item.description}</Text>
               <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
               <TouchableOpacity
-                style={[styles.toggleButton, item.status === 'approved' ? styles.approved : styles.pending]}
-                onPress={() => toggleTransactionApproval(item.transaction_id, item.status)}
+                style={[styles.toggleButton, styles.pending]}
+                onPress={() => approvePaymentRequest(item.transaction_id)}
               >
-                <Text style={styles.toggleButtonText}>{item.status === 'pending' ? 'אשר' : 'בטל'}</Text>
+                <Text style={styles.toggleButtonText}>אשר</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -120,17 +112,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
   headerContainer: {
     width: '100%',
     backgroundColor: '#3F51B5',
     borderBottomRightRadius: 20,
     borderBottomLeftRadius: 20,
     padding: 20,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
   kidsContainer: {
     width: '100%',
@@ -159,7 +151,7 @@ const styles = StyleSheet.create({
   image: {
     width: 100,
     height: 100,
-    borderRadius: '50%',
+    borderRadius: 50,
   },
   nfcContainer: {
     marginTop: 30,
@@ -181,7 +173,6 @@ const styles = StyleSheet.create({
   },
   transactionText: {
     fontSize: 16,
-    fontWeight: 'normal',
   },
   transactionAmount: {
     fontSize: 16,
@@ -191,9 +182,6 @@ const styles = StyleSheet.create({
   toggleButton: {
     padding: 10,
     borderRadius: 5,
-  },
-  approved: {
-    backgroundColor: 'green',
   },
   pending: {
     backgroundColor: 'orange',
