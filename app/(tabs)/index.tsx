@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import axios, { Axios } from 'axios';
 import {
   View,
   Text,
@@ -65,18 +65,20 @@ const MainKidScreen = () => {
   // Handler for the "Send" button click
   const handleSendClick = async () => {
     const data = {
-      amountToPay: amount,  // Amount to pay
-      messageToMom: message,  // Message for Mom
+      amount: amount,
+      description: message,
     };
+
+    const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
   
     try {
-      const response = await axios.post('https://your-backend-url.com/endpoint', data, {
-        headers: {
+      const response = await axios.post('http://localhost:3000/child-balance/place-payment-request/' + childId,
+        data, { headers: {
           'Content-Type': 'application/json',
         },
       });
   
-      if (response.status === 200) {
+      if (response.status === 201) {
         Alert.alert("יש! בקשת האישור נשלחה וממתינה לאישור ההורה");
         setTimeout(() => {
           setShowModal(false);
@@ -227,7 +229,7 @@ const MainKidScreen = () => {
                 <Text style={styles.emptyText}>
                   כאן יופיעו המשימות שההורים יתנו לך 🎯
                 </Text>
-              </View>
+               </View>
             ) : (
               <FlatList
                 data={tasks}
