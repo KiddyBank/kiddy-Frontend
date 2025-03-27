@@ -3,8 +3,6 @@ import { View, Text, Linking, StyleSheet, TouchableOpacity, ScrollView, Image } 
 import SelectDropdown from 'react-native-select-dropdown'
 import styles from '../styles/main-kid.styles';
 import { Link } from 'expo-router';
-import { blue } from 'react-native-reanimated/lib/typescript/Colors';
-
 
 
 interface Media {
@@ -96,10 +94,6 @@ const moneySystemsVideos: Media[] = [
     url: "https://www.youtube.com/watch?v=cs9lPymYPwM&ab_channel=%D7%9E%D7%98%D7%97%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%9C%D7%98%D7%9B%D7%A0%D7%95%D7%9C%D7%95%D7%92%D7%99%D7%94%D7%97%D7%99%D7%A0%D7%95%D7%9B%D7%99%D7%AA", 
     description: "חינוך פיננסי - הלוואות"
   },
-  // {
-  //   url: "https://www.youtube.com/watch?v=FBGZ0Y8nzfc&ab_channel=%D7%90%D7%9E%D7%99%D7%AA%D7%99%D7%94%D7%9E%D7%A1%D7%A4%D7%A8", 
-  //   description: "Lorem ipsum odor amet, consectetuer adipiscing elit. Adipiscing mattis volutpat suscipit duis sagittis nisl torquent commodo blandit nisi aliquam a."
-  // },
 ];
 
 const financialManagementVideos: Media[] = [

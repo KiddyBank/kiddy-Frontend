@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import { TextInput } from 'react-native';
+import Constants from 'expo-constants';
 
 type Transaction = {
   transaction_id: string;
@@ -46,7 +47,6 @@ const MainKidScreen = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [nfcTransactions, setNfcTransactions] = useState<NfcTransaction[]>([]);
-
   const [refreshing, setRefreshing] = useState(false);
 
   const [error, setError] = useState('');
@@ -56,6 +56,10 @@ const MainKidScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
+  const route = useRoute();
+
+  const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
 
   // Handler to toggle the modal visibility
   const handleButtonClick = () => {
@@ -72,7 +76,7 @@ const MainKidScreen = () => {
     const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
   
     try {
-      const response = await axios.post('http://localhost:3000/child-balance/place-payment-request/' + childId,
+      const response = await axios.post(`http://${LOCAL_IP}:3000/child-balance/place-payment-request/${childId}`,
         data, { headers: {
           'Content-Type': 'application/json',
         },
@@ -100,15 +104,12 @@ const MainKidScreen = () => {
     }
   };
 
-
-  const route = useRoute();
-
   const fetchAllData = async () => {
     try {
       const [balanceRes, transactionsRes, tasksRes] = await Promise.all([
-        axios.get('http://127.0.0.1:3000/users/balance'),
-        axios.get('http://127.0.0.1:3000/users/transactions'),
-        axios.get('http://127.0.0.1:3000/users/tasks'),
+        axios.get(`http://${LOCAL_IP}:3000/users/balance`),
+        axios.get(`http://${LOCAL_IP}:3000/users/transactions?transactionStatus=COMPLETED`),
+        axios.get(`http://${LOCAL_IP}:3000/users/tasks`),
       ]);
 
       setBalance(balanceRes.data.balance);
@@ -134,7 +135,7 @@ const MainKidScreen = () => {
   useEffect(() => {
     const fetchNfcTransactions = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/users/transactions');
+        const response = await axios.get(`http://${LOCAL_IP}:3000/users/transactions?transactionStatus=APPROVED_BY_PARENT`);
         setNfcTransactions(response.data);
       } catch (error) {
         console.error("❌ Failed to fetch NFC transactions:", error);
@@ -147,7 +148,7 @@ const MainKidScreen = () => {
 
   const toggleActivation = async (transactionId: string, currentStatus: string) => {
     try {
-      await axios.post(`http://localhost:3000/users/nfc-transactions/${transactionId}/toggle`);
+      await axios.post(`http://${LOCAL_IP}:3000/users/nfc-transactions/${transactionId}/toggle`);
       setNfcTransactions((prev) =>
         prev.map((txn) =>
           txn.transaction_id === transactionId ? { ...txn, status: currentStatus === 'pending' ? 'approved' : 'pending' } : txn
