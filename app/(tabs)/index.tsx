@@ -4,20 +4,17 @@ import {
   View,
   Text,
   Image,
-  FlatList,
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  RefreshControl,
-  Button,
-  Modal,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
+import PaymentRequestModal from '../popups/PaymentRequestModal';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
-import { TextInput } from 'react-native';
 import Constants from 'expo-constants';
+
 
 type Transaction = {
   transaction_id: string;
@@ -41,7 +38,6 @@ type NfcTransaction = {
   status: 'pending' | 'approved';
 };
 
-
 const MainKidScreen = () => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -57,52 +53,10 @@ const MainKidScreen = () => {
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
   const route = useRoute();
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
-
-  // Handler to toggle the modal visibility
-  const handleButtonClick = () => {
-    setShowModal(true);
-  };
-
-  // Handler for the "Send" button click
-  const handleSendClick = async () => {
-    const data = {
-      amount: amount,
-      description: message,
-    };
-
-    const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
-  
-    try {
-      const response = await axios.post(`http://${LOCAL_IP}:3000/child-balance/place-payment-request/${childId}`,
-        data, { headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if (response.status === 201) {
-        Alert.alert("יש! בקשת האישור נשלחה וממתינה לאישור ההורה");
-        setTimeout(() => {
-          setShowModal(false);
-        }, 3000);
-      } else {
-        Alert.alert("אוי לא! בקשת האישור לא הצליחה להשלח, אנא נסה שוב");
-        setTimeout(() => {
-          setShowModal(false);
-        }, 3000);
-        console.error('Unexpected error:', error);
-      }
-    } catch (error) {
-      console.error('Error sending data:', error);
-      Alert.alert("אוי לא! יש לנו קצת בעיות טכניות אנא נסה שוב מאוחר יותר");
-      setTimeout(() => {
-        setShowModal(false);
-      }, 3000);
-      console.error('Unexpected error:', error);
-    }
-  };
 
   const fetchAllData = async () => {
     try {
@@ -159,7 +113,6 @@ const MainKidScreen = () => {
     }
   };
 
-
   useFocusEffect(
     useCallback(() => {
       fetchAllData();
@@ -180,30 +133,29 @@ const MainKidScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.innerContainer}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false} // מסתיר את פס הגלילה
+      >
+        <View style={styles.innerContainer}>
+  
+          {/* אזור ההיתרה */}
           <View style={styles.header}>
             <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
             <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
             <Text style={styles.balanceLabel}>היתרה שלי</Text>
             {error !== '' && <Text style={styles.errorText}>{error}</Text>}
           </View>
-
+  
+          {/* קניות אחרונות */}
           <View style={styles.transactionsContainer}>
-            <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
-            {transactionsError !== '' && <Text style={styles.errorText}>{transactionsError}</Text>}
-
+            <Text style={styles.sectionTitle}>קניות שביצעת</Text>
             {transactions.length === 0 ? (
               <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>
-                  כאן יופיעו הקניות שתעשה כשתשלם בחנויות מהארנק שלך 🛍️
-                </Text>
+                <Text style={styles.emptyText}>כאן יופיעו הקניות שתעשה בחנויות 🛍️</Text>
               </View>
             ) : (
-              transactions.map((item) => (
+              transactions.slice(0, 4).map((item) => (
                 <View key={item.transaction_id} style={styles.transactionItem}>
                   <Ionicons
                     name={getTransactionColor(item.type) === 'green' ? 'add-circle' : 'remove-circle'}
@@ -220,102 +172,76 @@ const MainKidScreen = () => {
               ))
             )}
           </View>
-
+  
+          {/* משימות */}
           <View style={styles.tasksContainer}>
-            <Text style={styles.sectionTitle}>משימות להשלמה</Text>
-            {tasksError !== '' && <Text style={styles.errorText}>{tasksError}</Text>}
-
+            <Text style={styles.sectionTitle}>עובדים ומרוויחים</Text>
             {tasks.length === 0 ? (
               <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>
-                  כאן יופיעו המשימות שההורים יתנו לך 🎯
-                </Text>
-               </View>
+                <Text style={styles.emptyText}>כאן יופיעו המשימות שתקבל 🎯</Text>
+              </View>
             ) : (
-              <FlatList
-                data={tasks}
-                keyExtractor={(item) => item.task_id}
-                horizontal
-                renderItem={({ item }) => (
-                  <View style={styles.taskItem}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tasksScrollView}>
+                {tasks.map((item) => (
+                  <View key={item.task_id} style={styles.taskItem}>
                     <Text style={styles.taskText}>{item.name}</Text>
-                    <Text style={styles.taskReward}>{item.payment_amount} ₪</Text>
+                    <Text style={styles.taskReward}>{item.payment_amount.toLocaleString()} ₪</Text>
                     <TouchableOpacity style={styles.taskButton}>
                       <Text style={styles.taskButtonText}>בוצע</Text>
                     </TouchableOpacity>
                   </View>
-                )}
-              />
+                ))}
+              </ScrollView>
             )}
           </View>
-
+  
+          {/* בקשות להורים */}
           <View style={styles.nfcContainer}>
-            <Text style={styles.sectionTitle}>עסקאות NFC לאישור</Text>
-            {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
-            <FlatList
-              data={nfcTransactions}
-              keyExtractor={(item) => item.transaction_id}
-              renderItem={({ item }) => (
-                <View style={styles.transactionRow}>
-                  <Text style={styles.transactionText}>{item.description}</Text>
-                  <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
-                  <TouchableOpacity
-                    style={[styles.toggleButton, item.status === 'approved' ? styles.approved : styles.pending]}
-                    onPress={() => toggleActivation(item.transaction_id, item.status)}
-                  >
-                    <Text style={styles.toggleButtonText}>{item.status === 'pending' ? 'אשר' : 'בטל'}</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-          </View>
-        </ScrollView>
+          <Text style={styles.sectionTitle}>בקשות שמחכות לאישור ההורים</Text>
 
-        <View>
-
-      <TouchableOpacity style={styles.payButton} onPress={handleButtonClick}>
-          <Text style={styles.payButtonText}>בקש מההורים לפתוח תשלום</Text>
-        </TouchableOpacity>
-
-      <Modal
-        visible={showModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowModal(false)}
-      >
-        <View style={styles.overlay}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>סכום לתשלום</Text>
-
-            <Text>סכום לתשלום:</Text>
-            <TextInput
-              style={styles.input}
-              value={amount}
-              onChangeText={setAmount}
-              placeholder="הכנס סכום"
-              keyboardType="numeric"
-              textAlign="right"
-            />
-
-            <Text>הודעה לאמא:</Text>
-            <TextInput
-              style={styles.input}
-              value={message}
-              onChangeText={setMessage}
-              placeholder="הכנס הודעה"
-              multiline
-            />
-
-            <Button  color="#3F51B5" title="שלח" onPress={handleSendClick} />
-            <Button title="ביטול" color="#3F51B5" onPress={() => setShowModal(false)} />
-          </View>
+          {nfcTransactions.length === 0 ? (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptyText}>אין כרגע בקשות ממתינות</Text>
+            </View>
+          ) : (
+            <View style={styles.nfcScrollViewContainer}> 
+              <ScrollView 
+                style={styles.nfcScrollView} 
+                contentContainerStyle={{ flexGrow: 1 }} 
+                showsVerticalScrollIndicator={true} // פס גלילה מופעל
+              >
+                {nfcTransactions.map((item) => (
+                  <View key={item.transaction_id} style={styles.transactionItem}>
+                    <Ionicons name="card-outline" size={24} color={item.status === 'approved' ? 'green' : 'red'} />
+                    <View style={styles.transactionDetails}>
+                      <Text style={styles.transactionName}>{item.description}</Text>
+                    </View>
+                    <Text style={[styles.transactionAmount, { color: item.status === 'approved' ? 'green' : 'red' }]}>
+                      {item.amount.toLocaleString()} ₪
+                    </Text>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
-      </Modal>
-    </View>
+        </View>
+      </ScrollView>
+       {/* כפתור קבוע בתחתית המסך */}
+       <View style={styles.payButtonBackground}>
+        <View style={styles.payButtonContainer}>
+          <TouchableOpacity style={styles.payButton} onPress={() => setIsModalVisible(true)}          >
+            <Text style={styles.payButtonText}>בקש מההורים לפתוח תשלום</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      
+      <PaymentRequestModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
+
     </SafeAreaView>
   );
-
+  
+  
 };
 
 export default MainKidScreen;
