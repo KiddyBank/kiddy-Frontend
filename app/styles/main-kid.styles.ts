@@ -131,23 +131,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 
-  /* בקשות NFC */
+  /* בקשות */
   nfcContainer: {
     backgroundColor: 'white',
     borderRadius: 12,
     flex: 1,
     padding: 20,
     marginVertical: 10,
-    height: 300, // גובה קבוע
+    height: 300, 
   },
 
   nfcScrollView: {
-    flexGrow: 1, // מאפשר להתארך מעבר לגובה הקבוע
+    flexGrow: 1, 
   },
   
   nfcScrollViewContainer: {
     flex: 1,
-    maxHeight: 250, // גובה שמאפשר מקום לגלול
+    maxHeight: 250, 
     overflow: 'hidden',
   },
 
@@ -190,6 +190,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+  
+  scrollContent: {
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    flexGrow: 1,
+  },
+  
 
   /* Empty states */
   emptySection: {
@@ -206,14 +213,14 @@ const styles = StyleSheet.create({
 
   /* כפתור בקשת תשלום */
   payButtonBackground: {
-    width: '100%', // מחפה על כל הרוחב
-    backgroundColor: '#F5F5F5', // צבע רקע זהה לשאר העיצוב
-    paddingVertical: 15, // מוסיף ריווח מלמעלה ולמטה
-    alignItems: 'center', // מוודא שהתוכן באמצע
+    width: '100%', 
+    backgroundColor: '#F5F5F5', 
+    paddingVertical: 15, 
+    alignItems: 'center', 
   },
   
   payButtonContainer: {
-    width: '90%', // משאיר שוליים קטנים בצדדים
+    width: '90%', 
   },
   
   payButton: {
@@ -228,46 +235,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  
-  
-  /* פופאפ תשלום */
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-
-  modal: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: 320,
-    alignItems: 'center',
-  },
-
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-
-
-   scrollContent: {
-    flexGrow: 1,  
-    justifyContent: 'flex-start', 
-    paddingBottom: 20,
-  },
-
-  input: {
-    width: '100%',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 15,
-    textAlign: 'right',
   },
   
 });

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
-import PaymentRequestModal from '../popups/PaymentRequestModal';
+import PaymentRequestModal from '../popups/payment-request-modal';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import Constants from 'expo-constants';
 
@@ -124,7 +124,7 @@ const MainKidScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent} 
-        showsVerticalScrollIndicator={false} // מסתיר את פס הגלילה
+        showsVerticalScrollIndicator={false} 
       >
         <View style={styles.innerContainer}>
   
@@ -197,7 +197,7 @@ const MainKidScreen = () => {
               <ScrollView 
                 style={styles.nfcScrollView} 
                 contentContainerStyle={{ flexGrow: 1 }} 
-                showsVerticalScrollIndicator={true} // פס גלילה מופעל
+                showsVerticalScrollIndicator={true}
               >
                 {requests.map((item) => (
                   <View key={item.request_id} style={styles.transactionItem}>

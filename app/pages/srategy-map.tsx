@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ImageBackground, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Svg, Path, Circle, Text as SvgText } from 'react-native-svg';
-import styles from './styles/stage-map.styles';
+import styles from '../styles/stategy-map.styles';
 
 const { height, width } = Dimensions.get("window");
 
@@ -21,10 +21,8 @@ const StageMap = () => {
 
     return (
         <View style={styles.container}>
-            {/* סטטוס בר */}
-            <StatusBar barStyle="light-content" backgroundColor="#6A1B9A" />
+            <StatusBar barStyle="light-content" backgroundColor="#3F51B5" />
 
-            {/* כותרת */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Text style={styles.backText}>←</Text>
@@ -32,13 +30,11 @@ const StageMap = () => {
                 <Text style={styles.title}>מפת התקדמות</Text>
             </View>
 
-            {/* רקע קבוע בלי גלילה, מסודר כך שכל השלבים ייכנסו למסך */}
             <ImageBackground
                 style={styles.mapBackground}
-                source={require('../assets/images/colorful-background.png')} // תמונת רקע צבעונית
+                source={require('../assets/images/colorful-background.png')} 
             >
                 <Svg height={height} width={width}>
-                    {/* שביל מסודר כך שכל השלבים יהיו במסך */}
                     <Path
                         d={`M ${stages[0].cx} ${stages[0].cy}
                             Q ${width * 0.3} ${height * 0.79}, ${stages[1].cx} ${stages[1].cy}
@@ -52,13 +48,12 @@ const StageMap = () => {
                         strokeLinecap="round"
                     />
 
-                    {/* שלבים מסודרים בלי חיתוך */}
                     {stages.map((stage) => (
                         <React.Fragment key={stage.id}>
                             <Circle
                                 cx={stage.cx}
                                 cy={stage.cy}
-                                r="20" // גודל מתאים לכל המסך
+                                r="20" 
                                 fill={stage.completed ? "#4CAF50" : "#FF9800"}
                                 stroke="white"
                                 strokeWidth="2"

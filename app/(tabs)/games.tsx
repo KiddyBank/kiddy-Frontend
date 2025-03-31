@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, Linking, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown'
-import styles from '../styles/main-kid.styles';
+import styles from '../styles/games.styles';
 import { Link } from 'expo-router';
 
 
@@ -191,172 +191,53 @@ export default function GameScreen() {
 
 
   return (
-    <View style={pageStyles.container}>
-      <Link href="/StageMap" asChild>
-        <TouchableOpacity style={pageStyles.button}>
-          <Text style={pageStyles.buttonText}>מעבר למפת התקדמות</Text>
-        </TouchableOpacity>
-      </Link>
-      <Text style={pageStyles.header}>סרטונים</Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>סרטונים</Text>
       <SelectDropdown
         data={videoTypesChoices}
         defaultValue={videoTypesChoices[0]}
-        onSelect={(selectedItem) => {
-          setChosenVideosType(selectedItem);
-        }}
-        renderButton={(selectedItem) => {
-          return (
-            <View style={pageStyles.dropdownButtonStyle}>
-              <Text style={pageStyles.dropdownButtonTxtStyle}>
-                {selectedItem?.displayText}
-              </Text>
-            </View>
-          );
-        }}
-        renderItem={(item, _, isSelected) => {
-          return (
-            <View style={{...pageStyles.dropdownItemStyle, ...(isSelected && {backgroundColor: '#D2D9DF'})}}>
-              <Text style={pageStyles.dropdownItemTxtStyle}>{item.displayText}</Text>
-            </View>
-          );
-        }}
+        onSelect={(selectedItem) => setChosenVideosType(selectedItem)}
+        renderButton={(selectedItem) => (
+          <View style={styles.dropdownButtonStyle}>
+            <Text style={styles.dropdownButtonTxtStyle}>{selectedItem?.displayText}</Text>
+          </View>
+        )}
+        renderItem={(item, _, isSelected) => (
+          <View style={{ ...styles.dropdownItemStyle, ...(isSelected && { backgroundColor: '#D2D9DF' }) }}>
+            <Text style={styles.dropdownItemTxtStyle}>{item.displayText}</Text>
+          </View>
+        )}
         showsVerticalScrollIndicator={false}
-        dropdownStyle={pageStyles.dropdownMenuStyle}
+        dropdownStyle={styles.dropdownMenuStyle}
       />
+      
       <ScrollView horizontal>
-        {chosenVideosType.videos.map(video => 
-          <TouchableOpacity key={video.url} style={pageStyles.card} onPress={() => openLink(video.url)}>
-            <Image style={pageStyles.stretch} source={{
-              uri: getYoutubeThumbnail(video.url, 'low')
-            }}/>
-            <Text style={pageStyles.videoDescription}>{video.description}</Text>
+        {chosenVideosType.videos.map(video => (
+          <TouchableOpacity key={video.url} style={styles.card} onPress={() => openLink(video.url)}>
+            <Image style={styles.stretch} source={{ uri: getYoutubeThumbnail(video.url, 'low') }} />
+            <Text style={styles.videoDescription}>{video.description}</Text>
           </TouchableOpacity>
-        )}
+        ))}
       </ScrollView>
-      <Text style={pageStyles.header}>משחקים</Text>
+      
+      <Text style={styles.header}>משחקים</Text>
       <ScrollView horizontal>
-        {games.map(game => 
-          <TouchableOpacity key={game.url} style={pageStyles.card} onPress={() => openLink(game.url)}>
-            <Image style={pageStyles.stretch} source={{
-              uri: game.image,
-            }}/>
-            <Text style={pageStyles.gameTitle}>{game.description}</Text>
-            <View style={pageStyles.gamePlayButton}>
-              <Text style={pageStyles.gameButtonText}>Play</Text>
+        {games.map(game => (
+          <TouchableOpacity key={game.url} style={styles.card} onPress={() => openLink(game.url)}>
+            <Image style={styles.stretch} source={{ uri: game.image }} />
+            <Text style={styles.gameTitle}>{game.description}</Text>
+            <View style={styles.gamePlayButton}>
+              <Text style={styles.gameButtonText}>שחק</Text>
             </View>
           </TouchableOpacity>
-        )}
+        ))}
       </ScrollView>
+
+      <Link href="./pages/StageMap" asChild>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>מפת שלבים</Text>
+        </TouchableOpacity>
+      </Link>
     </View>
   );
 }
-
-const pageStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f8ff',
-    paddingTop: 30
-  },
-  header: {
-    ...styles.sectionTitle,
-    marginTop: 20
-  },
-  card: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 30,
-    width: 200,
-    margin: 15,
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  videoDescription: {
-    fontWeight: "bold"
-  },
-  gameTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: "#3F51B5",
-  },
-  button: {
-    width: "15%",
-    padding: 10,
-    backgroundColor: "#3F51B5",
-    borderRadius: 20,
-    display: "flex",
-    alignItems: "center"
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  gamePlayButton: {
-    width: "100%",
-    padding: 10,
-    backgroundColor: "#3F51B5",
-    borderRadius: 20,
-    display: "flex",
-    alignItems: "center"
-  },
-  gameButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 30
-  },
-  stretch: {
-    width: "100%",
-    borderRadius: 20,
-    height: 130,
-    resizeMode: 'stretch',
-  },
-  dropdownButtonStyle: {
-    width: "70%",
-    height: 50,
-    backgroundColor: '#E9ECEF',
-    borderRadius: 12,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-  },
-  dropdownButtonTxtStyle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '500',
-    direction: 'rtl',
-    color: '#151E26',
-  },
-  dropdownButtonArrowStyle: {
-    fontSize: 28,
-  },
-  dropdownButtonIconStyle: {
-    fontSize: 28,
-    marginRight: 8,
-  },
-  dropdownMenuStyle: {
-    backgroundColor: '#E9ECEF',
-    borderRadius: 8,
-  },
-  dropdownItemStyle: {
-    width: '100%',
-    flexDirection: 'row',
-    paddingHorizontal: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  dropdownItemTxtStyle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '500',
-    direction: 'rtl',
-    color: '#151E26',
-  },
-  dropdownItemIconStyle: {
-    fontSize: 28,
-    marginRight: 8,
-  },
-});
