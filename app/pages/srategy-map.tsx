@@ -32,7 +32,7 @@ const StageMap = () => {
 
             <ImageBackground
                 style={styles.mapBackground}
-                source={require('../assets/images/colorful-background.png')} 
+                source={require('../../assets/images/colorful-background.png')} 
             >
                 <Svg height={height} width={width}>
                     <Path

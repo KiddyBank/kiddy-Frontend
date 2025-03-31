@@ -233,7 +233,7 @@ export default function GameScreen() {
         ))}
       </ScrollView>
 
-      <Link href="./pages/StageMap" asChild>
+      <Link href="../pages/srategy-map" asChild>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>מפת שלבים</Text>
         </TouchableOpacity>
