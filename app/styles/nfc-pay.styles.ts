@@ -1,32 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
-  nfcNotice: {
-    marginTop: 10,
-    fontSize: 14,
-    color: 'gray',
-    textAlign: 'center',
-  },
-  
-  payButton: {
-    backgroundColor: '#3F51B5',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  
-  payButtonText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  
-  successMessage: {
-    color: 'green',
-    fontSize: 16,
-    textAlign: 'center',
-    marginVertical: 10,
-  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)', // dim background

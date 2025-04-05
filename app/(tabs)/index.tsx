@@ -76,7 +76,7 @@ const MainKidScreen = () => {
         axios.get(`http://${LOCAL_IP}:3000/users/balance/${childId}`),
         axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=COMPLETED`),
         axios.get(`http://${LOCAL_IP}:3000/users/tasks/${childId}`),
-        axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=PENDING_PARENT_APPROVAL`), 
+        axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=APPROVED_BY_PARENT`), 
       ]);
   
       setBalance(balanceRes.data.balance);
