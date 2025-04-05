@@ -1,6 +1,59 @@
 import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
+  nfcNotice: {
+    marginTop: 10,
+    fontSize: 14,
+    color: 'gray',
+    textAlign: 'center',
+  },
+  
+  payButton: {
+    backgroundColor: '#3F51B5',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  
+  payButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  
+  successMessage: {
+    color: 'green',
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)', // dim background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modal: {
+    backgroundColor: 'white',
+    width: '85%',
+    padding: 24,
+    borderRadius: 12,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+    color: '#3F51B5',
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#F9FAFB", // רקע אפור בהיר ונעים

@@ -14,10 +14,12 @@ import styles from '../styles/main-kid.styles';
 import PaymentRequestModal from '../popups/payment-request-modal';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import Constants from 'expo-constants';
+import NfcChargeModal from '../popups/nfc-charge-modal';
 
 
 type Transaction = {
   transaction_id: string;
+  status: string;
   type: string;
   amount: number;
   description: string;
@@ -35,75 +37,34 @@ type Requests = {
   request_id: string;
   description: string;
   amount: number;
-  status: 'PENDING_FOR_PARENT' | 'APPORVED_BY_PARENT';
+  status: 'PENDING_PARENT_APPROVAL' | 'APPORVED_BY_PARENT';
 };
 
 const MainKidScreen = () => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [nfcModalVisible, setNfcModalVisible] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string>();
+
 
   const [error, setError] = useState('');
+
+
+  const [refreshing, setRefreshing] = useState(false);
   const [transactionsError, setTransactionsError] = useState('');
   const [tasksError, setTasksError] = useState('');
+ 
+  const route = useRoute();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [requests, setRequests] = useState<Transaction[]>([]);
+  const [requestsError, setRequestsError] = useState('');
 
+
+//TODO: determine relevance of em
   const [showModal, setShowModal] = useState(false);
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
-
-  const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
-
-
-
-  // Handler to toggle the modal visibility
-  const handleButtonClick = () => {
-    setShowModal(true);
-  };
-
-  // Handler for the "Send" button click
-  const handleSendClick = async () => {
-    const data = {
-      amount: amount,
-      description: message,
-    };
-
-  
-    try {
-      const response = await axios.post('http://localhost:3000/child-balance/place-payment-request/' + childId,
-        data, { headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if (response.status === 201) {
-        Alert.alert("יש! בקשת האישור נשלחה וממתינה לאישור ההורה");
-        setTimeout(() => {
-          setShowModal(false);
-        }, 3000);
-      } else {
-        Alert.alert("אוי לא! בקשת האישור לא הצליחה להשלח, אנא נסה שוב");
-        setTimeout(() => {
-          setShowModal(false);
-        }, 3000);
-        console.error('Unexpected error:', error);
-      }
-    } catch (error) {
-      console.error('Error sending data:', error);
-      Alert.alert("אוי לא! יש לנו קצת בעיות טכניות אנא נסה שוב מאוחר יותר");
-      setTimeout(() => {
-        setShowModal(false);
-      }, 3000);
-      console.error('Unexpected error:', error);
-    }
-  };
-
-
-  const route = useRoute();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [requests, setRequests] = useState<Requests[]>([]);
-  const [requestsError, setRequestsError] = useState('');
-
 
 
   const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
@@ -112,10 +73,10 @@ const MainKidScreen = () => {
   const fetchAllData = async () => {
     try {
       const [balanceRes, transactionsRes, tasksRes, requestsRes] = await Promise.all([
-        axios.get(`http://${LOCAL_IP}:3000/users/balance`),
-        axios.get(`http://${LOCAL_IP}:3000/users/transactions`),
-        axios.get(`http://${LOCAL_IP}:3000/users/tasks`),
-        axios.get(`http://${LOCAL_IP}:3000/users/requests`), 
+        axios.get(`http://${LOCAL_IP}:3000/users/balance/${childId}`),
+        axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=COMPLETED`),
+        axios.get(`http://${LOCAL_IP}:3000/users/tasks/${childId}`),
+        axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=PENDING_PARENT_APPROVAL`), 
       ]);
   
       setBalance(balanceRes.data.balance);
@@ -241,25 +202,36 @@ const MainKidScreen = () => {
               <Text style={styles.emptyText}>אין כרגע בקשות ממתינות</Text>
             </View>
           ) : (
-            <View style={styles.nfcScrollViewContainer}> 
-              <ScrollView 
-                style={styles.nfcScrollView} 
-                contentContainerStyle={{ flexGrow: 1 }} 
-                showsVerticalScrollIndicator={true}
-              >
-                {requests.map((item) => (
-                  <View key={item.request_id} style={styles.transactionItem}>
-                  <Ionicons name="card-outline" size={24} color={getRequestColor(item.status)} />
+            <View style={styles.nfcScrollViewContainer}>
+            <ScrollView
+              style={styles.nfcScrollView}
+              contentContainerStyle={{ flexGrow: 1 }}
+              showsVerticalScrollIndicator={true}
+            >
+              {requests.map((item) => (
+                <View key={item.transaction_id} style={styles.transactionItem}>
+                  
+                  <TouchableOpacity activeOpacity={0.6}
+                    onPress={() => {
+                      console.log('Request ID:', item);
+                      setSelectedTransactionId(item.transaction_id);
+                      setNfcModalVisible(true);
+                    }}>
+                    <Ionicons name="card-outline" size={24} color={getRequestColor(item.status)}/>
+                  </TouchableOpacity>
+          
                   <View style={styles.transactionDetails}>
                     <Text style={styles.transactionName}>{item.description}</Text>
                   </View>
+          
                   <Text style={[styles.transactionAmount, { color: getRequestColor(item.status) }]}>
                     {item.amount.toLocaleString()} ₪
                   </Text>
                 </View>
-                ))}
-              </ScrollView>
-            </View>
+              ))}
+            </ScrollView>
+          </View>
+          
           )}
         </View>
         </View>
@@ -275,6 +247,14 @@ const MainKidScreen = () => {
       </View>
       
       <PaymentRequestModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
+
+      <NfcChargeModal visible={nfcModalVisible} onClose={() => () => 
+      {
+      setNfcModalVisible(false);
+      setSelectedTransactionId(undefined);
+      }} transactionId={selectedTransactionId} />
+
+
 
     </SafeAreaView>
   );
