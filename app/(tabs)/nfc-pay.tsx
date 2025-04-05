@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Animated, Alert, TouchableOpacity } from "react-native";
 import { Audio } from "expo-av";
-import LottieView from "lottie-react-native";
 import styles from "../styles/nfc-pay.styles";
 import { useNavigation } from "@react-navigation/native";
 import { useSearchParams } from "expo-router/build/hooks";
 import axios from "axios";
+import Constants from 'expo-constants';
+
 
 const NFCPaymentScreen = () => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [animation] = useState(new Animated.Value(1));
   const navigation = useNavigation();
   const [userId, transactionId]  = useSearchParams();
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
+
 
   useEffect(() => {
     startAnimation();
@@ -44,8 +47,10 @@ const NFCPaymentScreen = () => {
       console.log(userId[1], transactionId[1]);
 
       try {
-        await axios.post(`http://localhost:3000/users/perform-payment/${userId[1]}`, {transactionId: transactionId[1]});
-      } catch (error) {
+        await axios.post(`http://${LOCAL_IP}:3000/users/perform-payment/${userId[1]}`, {
+          transactionId: transactionId[1]
+        });
+              } catch (error) {
         console.error("שגיאה בחיוב הארנק", error);
       }
 

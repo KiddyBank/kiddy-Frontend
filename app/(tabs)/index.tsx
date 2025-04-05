@@ -4,21 +4,17 @@ import {
   View,
   Text,
   Image,
-  FlatList,
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  RefreshControl,
-  Button,
-  Modal,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
+import PaymentRequestModal from '../popups/payment-request-modal';
+import { useRoute, useFocusEffect } from '@react-navigation/native';
+import Constants from 'expo-constants';
 
-import { TextInput } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useRoute } from '@react-navigation/native';
 
 type Transaction = {
   transaction_id: string;
@@ -35,22 +31,17 @@ type TaskType = {
   task_status: string;
 };
 
-type NfcTransaction = {
-  transaction_id: string;
+type Requests = {
+  request_id: string;
   description: string;
   amount: number;
-  status: 'pending' | 'approved';
+  status: 'PENDING_FOR_PARENT' | 'APPORVED_BY_PARENT';
 };
-
 
 const MainKidScreen = () => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
-  const [nfcTransactions, setNfcTransactions] = useState<NfcTransaction[]>([]);
-  const router = useRouter();
-
-
   const [refreshing, setRefreshing] = useState(false);
 
   const [error, setError] = useState('');
@@ -109,58 +100,47 @@ const MainKidScreen = () => {
 
 
   const route = useRoute();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [requests, setRequests] = useState<Requests[]>([]);
+  const [requestsError, setRequestsError] = useState('');
+
+
+
+  const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
 
   const fetchAllData = async () => {
     try {
-      const [balanceRes, transactionsRes, tasksRes] = await Promise.all([
-        axios.get('http://127.0.0.1:3000/users/balance'),
-        axios.get('http://127.0.0.1:3000/users/transactions?transactionStatus=COMPLETED'),
-        axios.get('http://127.0.0.1:3000/users/tasks'),
+      const [balanceRes, transactionsRes, tasksRes, requestsRes] = await Promise.all([
+        axios.get(`http://${LOCAL_IP}:3000/users/balance`),
+        axios.get(`http://${LOCAL_IP}:3000/users/transactions`),
+        axios.get(`http://${LOCAL_IP}:3000/users/tasks`),
+        axios.get(`http://${LOCAL_IP}:3000/users/requests`), 
       ]);
-
+  
       setBalance(balanceRes.data.balance);
       setTransactions(transactionsRes.data);
       setTasks(tasksRes.data);
-
+      setRequests(requestsRes.data); 
+  
       setError('');
       setTransactionsError('');
       setTasksError('');
+      setRequestsError(''); 
+    
     } catch (error) {
       console.error('❌ שגיאה כללית:', error);
       setError('שגיאה בשליפת יתרה 😢');
       setTransactionsError('שגיאה בשליפת תנועות 😢');
       setTasksError('שגיאה בשליפת משימות 😢');
-    }
-  };
+      setRequestsError('שגיאה בשליפת בקשות 😢');
+  };}
+  
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchAllData().finally(() => setRefreshing(false));
   }, []);
-
-  useEffect(() => {
-    const fetchNfcTransactions = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/users/transactions?transactionStatus=APPORVED_BY_PARENT');
-        setNfcTransactions(response.data);
-      } catch (error) {
-        console.error("❌ Failed to fetch NFC transactions:", error);
-        setError('שגיאה בשליפת עסקאות NFC 😢');
-      }
-    };
-
-    fetchNfcTransactions();
-  }, []);
-
-  const toggleActivation = async (transactionId: string) => {
-    try {
-      router.navigate(`/nfc-pay?userId=${childId}&transactionId=${transactionId}`);
-
-     
-    } catch (error) {
-      console.error("❌ שגיאה בזיהוי סטטוס NFC", error);
-    }
-  };
 
 
   useFocusEffect(
@@ -181,32 +161,38 @@ const MainKidScreen = () => {
     return positiveTypes.includes(type.toLowerCase()) ? 'green' : 'red';
   };
 
+  // פונקציה לקביעת צבע לפי סטטוס תנועה
+  const getRequestColor = (status: string) => {
+    const positiveTypes = ['APPROVED_BY_PARENT'];
+    return positiveTypes.includes(status.toLowerCase()) ? 'green' : 'orange';
+  };
+  
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.innerContainer}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false} 
+      >
+        <View style={styles.innerContainer}>
+  
+          {/* אזור ההיתרה */}
           <View style={styles.header}>
             <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
             <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
             <Text style={styles.balanceLabel}>היתרה שלי</Text>
             {error !== '' && <Text style={styles.errorText}>{error}</Text>}
           </View>
-
+  
+          {/* קניות אחרונות */}
           <View style={styles.transactionsContainer}>
             <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
-            {transactionsError !== '' && <Text style={styles.errorText}>{transactionsError}</Text>}
-
             {transactions.length === 0 ? (
               <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>
-                  כאן יופיעו הקניות שתעשה כשתשלם בחנויות מהארנק שלך 🛍️
-                </Text>
+                <Text style={styles.emptyText}>כאן יופיעו הקניות שתעשה בחנויות או התשלומים שתקבל🛍️</Text>
               </View>
             ) : (
-              transactions.map((item) => (
+              transactions.slice(0, 4).map((item) => (
                 <View key={item.transaction_id} style={styles.transactionItem}>
                   <Ionicons
                     name={getTransactionColor(item.type) === 'green' ? 'add-circle' : 'remove-circle'}
@@ -223,102 +209,77 @@ const MainKidScreen = () => {
               ))
             )}
           </View>
-
+  
+          {/* משימות */}
           <View style={styles.tasksContainer}>
-            <Text style={styles.sectionTitle}>משימות להשלמה</Text>
-            {tasksError !== '' && <Text style={styles.errorText}>{tasksError}</Text>}
-
+            <Text style={styles.sectionTitle}>עובדים ומרוויחים</Text>
             {tasks.length === 0 ? (
               <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>
-                  כאן יופיעו המשימות שההורים יתנו לך 🎯
-                </Text>
-               </View>
+                <Text style={styles.emptyText}>כאן יופיעו המשימות שתקבל 🎯</Text>
+              </View>
             ) : (
-              <FlatList
-                data={tasks}
-                keyExtractor={(item) => item.task_id}
-                horizontal
-                renderItem={({ item }) => (
-                  <View style={styles.taskItem}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tasksScrollView}>
+                {tasks.map((item) => (
+                  <View key={item.task_id} style={styles.taskItem}>
                     <Text style={styles.taskText}>{item.name}</Text>
-                    <Text style={styles.taskReward}>{item.payment_amount} ₪</Text>
+                    <Text style={styles.taskReward}>{item.payment_amount.toLocaleString()} ₪</Text>
                     <TouchableOpacity style={styles.taskButton}>
                       <Text style={styles.taskButtonText}>בוצע</Text>
                     </TouchableOpacity>
                   </View>
-                )}
-              />
+                ))}
+              </ScrollView>
             )}
           </View>
-
+  
+          {/* בקשות להורים */}
           <View style={styles.nfcContainer}>
-            <Text style={styles.sectionTitle}>עסקאות NFC לאישור</Text>
-            {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
-            <FlatList
-              data={nfcTransactions}
-              keyExtractor={(item) => item.transaction_id}
-              renderItem={({ item }) => (
-                <View style={styles.transactionRow}>
-                  <Text style={styles.transactionText}>{item.description}</Text>
-                  <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
-                  <TouchableOpacity
-                    style={[styles.toggleButton, item.status === 'approved' ? styles.approved : styles.pending]}
-                    onPress={() => toggleActivation(item.transaction_id)}
-                  >
-                    <Text style={styles.toggleButtonText}>שלם</Text>
-                  </TouchableOpacity>
+          <Text style={styles.sectionTitle}>בקשות שמחכות לאישור ההורים</Text>
+
+          {requests.length === 0 ? (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptyText}>אין כרגע בקשות ממתינות</Text>
+            </View>
+          ) : (
+            <View style={styles.nfcScrollViewContainer}> 
+              <ScrollView 
+                style={styles.nfcScrollView} 
+                contentContainerStyle={{ flexGrow: 1 }} 
+                showsVerticalScrollIndicator={true}
+              >
+                {requests.map((item) => (
+                  <View key={item.request_id} style={styles.transactionItem}>
+                  <Ionicons name="card-outline" size={24} color={getRequestColor(item.status)} />
+                  <View style={styles.transactionDetails}>
+                    <Text style={styles.transactionName}>{item.description}</Text>
+                  </View>
+                  <Text style={[styles.transactionAmount, { color: getRequestColor(item.status) }]}>
+                    {item.amount.toLocaleString()} ₪
+                  </Text>
                 </View>
-              )}
-            />
-          </View>
-        </ScrollView>
-
-        <View>
-
-      <TouchableOpacity style={styles.payButton} onPress={handleButtonClick}>
-          <Text style={styles.payButtonText}>בקש מההורים לפתוח תשלום</Text>
-        </TouchableOpacity>
-
-      <Modal
-        visible={showModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowModal(false)}
-      >
-        <View style={styles.overlay}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>סכום לתשלום</Text>
-
-            <Text>סכום לתשלום:</Text>
-            <TextInput
-              style={styles.input}
-              value={amount}
-              onChangeText={setAmount}
-              placeholder="הכנס סכום"
-              keyboardType="numeric"
-              textAlign="right"
-            />
-
-            <Text>הודעה לאמא:</Text>
-            <TextInput
-              style={styles.input}
-              value={message}
-              onChangeText={setMessage}
-              placeholder="הכנס הודעה"
-              multiline
-            />
-
-            <Button  color="#E9ECEF" title="שלח" onPress={handleSendClick} />
-            <Button title="ביטול" color="#3F51B5" onPress={() => setShowModal(false)} />
-          </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
-      </Modal>
-    </View>
+        </View>
+      </ScrollView>
+
+       {/* כפתור קבוע בתחתית המסך */}
+       <View style={styles.payButtonBackground}>
+        <View style={styles.payButtonContainer}>
+          <TouchableOpacity style={styles.payButton} onPress={() => setIsModalVisible(true)}          >
+            <Text style={styles.payButtonText}>בקש מההורים לפתוח תשלום</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      
+      <PaymentRequestModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
+
     </SafeAreaView>
   );
-
+  
+  
 };
 
 export default MainKidScreen;
