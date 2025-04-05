@@ -21,7 +21,6 @@ export default function TabLayout() {
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
           },
           default: {},
@@ -60,7 +59,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="parent"
         options={{
-          href: accountType === AccountType.PARENT ? "/parent" : null,
+          href: accountType === AccountType.PARENT ? "/parent-layout" : null,
           title: 'ראשי',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
@@ -68,7 +67,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'הגדרות',
+          title: 'אזור אישי',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
         }}
       />
