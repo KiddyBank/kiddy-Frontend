@@ -38,7 +38,6 @@ const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , tran
     animateButton();
 
     try {
-      console.log(transactionId)
       const response = await axios.post(
         `http://${LOCAL_IP}:3000/users/perform-payment/${childId}`,
         {transactionId},
@@ -62,33 +61,36 @@ const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , tran
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <Text style={styles.modalTitle}>תשלום באמצעות NFC</Text>
+<Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+  <View style={styles.overlay}>
+    <View style={styles.modal}>
+      <Text style={styles.modalTitle}>תשלום באמצעות NFC</Text>
 
-          <Text style={styles.instructions}>
-            קרב את הטלפון למסופון כדי לבצע את התשלום.
-          </Text>
+      <Text style={styles.instructions}>
+        קרב את הטלפון למסופון כדי לבצע את התשלום.
+      </Text>
 
-          <Text style={styles.nfcNotice}>
-            נא לוודא שה-NFC פעיל במכשיר (Settings {'>'} Connections {'>'} NFC).
-          </Text>
+      <Text style={styles.nfcNotice}>
+        נא לוודא שה-NFC פעיל במכשיר (Settings {'>'} Connections {'>'} NFC).
+      </Text>
 
-          {paymentSuccess ? (
-            <Text style={styles.successMessage}>התשלום הושלם בהצלחה!</Text>
-          ) : (
-            <Animated.View style={{ transform: [{ scale: animation }] }}>
-              <TouchableOpacity onPress={proceedPayment} style={styles.payButton}>
-                <Text style={styles.payButtonText}>בצע תשלום</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          )}
+      {paymentSuccess ? (
+        <Text style={styles.successMessage}>התשלום הושלם בהצלחה!</Text>
+      ) : (
+        <Animated.View style={{ transform: [{ scale: animation }] }}>
+          <TouchableOpacity onPress={proceedPayment} style={styles.payButton}>
+            <Text style={styles.payButtonText}>בצע תשלום</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 
-          <Button title="ביטול" color="#3F51B5" onPress={onClose} />
-        </View>
-      </View>
-    </Modal>
+      <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+        <Text style={styles.cancelButtonText}>ביטול</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
   );
 };
 

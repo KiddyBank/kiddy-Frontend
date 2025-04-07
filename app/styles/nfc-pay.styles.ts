@@ -8,17 +8,6 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
 
-  modal: {
-    backgroundColor: 'white',
-    width: '85%',
-    padding: 24,
-    borderRadius: 12,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
 
   modalTitle: {
     fontSize: 20,
@@ -100,4 +89,32 @@ export default StyleSheet.create({
     textAlign: "center",
     width: "85%",
   },
+
+  modal: {
+    backgroundColor: 'white',
+    width: '85%',
+    padding: 24,
+    borderRadius: 12,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    marginTop: 20,
+    backgroundColor: '#9E9E9E',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '100%',
+  },
+  
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  }  
+  
 });

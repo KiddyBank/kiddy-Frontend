@@ -60,13 +60,6 @@ const MainKidScreen = () => {
   const [requests, setRequests] = useState<Transaction[]>([]);
   const [requestsError, setRequestsError] = useState('');
 
-
-//TODO: determine relevance of em
-  const [showModal, setShowModal] = useState(false);
-  const [amount, setAmount] = useState('');
-  const [message, setMessage] = useState('');
-
-
   const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
 
@@ -248,8 +241,7 @@ const MainKidScreen = () => {
       
       <PaymentRequestModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
 
-      <NfcChargeModal visible={nfcModalVisible} onClose={() => () => 
-      {
+      <NfcChargeModal visible={nfcModalVisible} onClose={() => {
       setNfcModalVisible(false);
       setSelectedTransactionId(undefined);
       }} transactionId={selectedTransactionId} />
