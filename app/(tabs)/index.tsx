@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios, { Axios } from 'axios';
+import axios from 'axios';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
@@ -33,12 +32,6 @@ type TaskType = {
   task_status: string;
 };
 
-type Requests = {
-  request_id: string;
-  description: string;
-  amount: number;
-  status: 'PENDING_PARENT_APPROVAL' | 'APPORVED_BY_PARENT';
-};
 
 const MainKidScreen = () => {
   const [balance, setBalance] = useState(0);
@@ -47,11 +40,8 @@ const MainKidScreen = () => {
   const [nfcModalVisible, setNfcModalVisible] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState<string>();
 
-
   const [error, setError] = useState('');
 
-
-  const [refreshing, setRefreshing] = useState(false);
   const [transactionsError, setTransactionsError] = useState('');
   const [tasksError, setTasksError] = useState('');
  
@@ -90,12 +80,6 @@ const MainKidScreen = () => {
       setRequestsError('שגיאה בשליפת בקשות 😢');
   };}
   
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchAllData().finally(() => setRefreshing(false));
-  }, []);
-
 
   useFocusEffect(
     useCallback(() => {
@@ -206,7 +190,6 @@ const MainKidScreen = () => {
                   
                   <TouchableOpacity activeOpacity={0.6}
                     onPress={() => {
-                      console.log('Request ID:', item);
                       setSelectedTransactionId(item.transaction_id);
                       setNfcModalVisible(true);
                     }}>
@@ -244,6 +227,7 @@ const MainKidScreen = () => {
       <NfcChargeModal visible={nfcModalVisible} onClose={() => {
       setNfcModalVisible(false);
       setSelectedTransactionId(undefined);
+      fetchAllData();
       }} transactionId={selectedTransactionId} />
 
 
