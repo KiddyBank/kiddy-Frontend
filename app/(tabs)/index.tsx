@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios, { Axios } from 'axios';
+import axios from 'axios';
 import {
   View,
   Text,
@@ -7,17 +7,18 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/main-kid.styles';
 import PaymentRequestModal from '../popups/payment-request-modal';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import Constants from 'expo-constants';
+import NfcChargeModal from '../popups/nfc-charge-modal';
 
 
 type Transaction = {
   transaction_id: string;
+  status: string;
   type: string;
   amount: number;
   description: string;
@@ -31,32 +32,23 @@ type TaskType = {
   task_status: string;
 };
 
-type Requests = {
-  request_id: string;
-  description: string;
-  amount: number;
-  status: 'PENDING_FOR_PARENT' | 'APPORVED_BY_PARENT';
-};
 
 const MainKidScreen = () => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [tasks, setTasks] = useState<TaskType[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [nfcModalVisible, setNfcModalVisible] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string>();
 
   const [error, setError] = useState('');
+
   const [transactionsError, setTransactionsError] = useState('');
   const [tasksError, setTasksError] = useState('');
-
-  const [showModal, setShowModal] = useState(false);
-  const [amount, setAmount] = useState('');
-  const [message, setMessage] = useState('');
+ 
   const route = useRoute();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [requests, setRequests] = useState<Requests[]>([]);
+  const [requests, setRequests] = useState<Transaction[]>([]);
   const [requestsError, setRequestsError] = useState('');
-
-
 
   const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
@@ -64,10 +56,10 @@ const MainKidScreen = () => {
   const fetchAllData = async () => {
     try {
       const [balanceRes, transactionsRes, tasksRes, requestsRes] = await Promise.all([
-        axios.get(`http://${LOCAL_IP}:3000/users/balance`),
-        axios.get(`http://${LOCAL_IP}:3000/users/transactions`),
-        axios.get(`http://${LOCAL_IP}:3000/users/tasks`),
-        axios.get(`http://${LOCAL_IP}:3000/users/requests`), 
+        axios.get(`http://${LOCAL_IP}:3000/users/balance/${childId}`),
+        axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=COMPLETED`),
+        axios.get(`http://${LOCAL_IP}:3000/users/tasks/${childId}`),
+        axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=APPROVED_BY_PARENT`), 
       ]);
   
       setBalance(balanceRes.data.balance);
@@ -88,12 +80,6 @@ const MainKidScreen = () => {
       setRequestsError('שגיאה בשליפת בקשות 😢');
   };}
   
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchAllData().finally(() => setRefreshing(false));
-  }, []);
-
 
   useFocusEffect(
     useCallback(() => {
@@ -193,25 +179,35 @@ const MainKidScreen = () => {
               <Text style={styles.emptyText}>אין כרגע בקשות ממתינות</Text>
             </View>
           ) : (
-            <View style={styles.nfcScrollViewContainer}> 
-              <ScrollView 
-                style={styles.nfcScrollView} 
-                contentContainerStyle={{ flexGrow: 1 }} 
-                showsVerticalScrollIndicator={true}
-              >
-                {requests.map((item) => (
-                  <View key={item.request_id} style={styles.transactionItem}>
-                  <Ionicons name="card-outline" size={24} color={getRequestColor(item.status)} />
+            <View style={styles.nfcScrollViewContainer}>
+            <ScrollView
+              style={styles.nfcScrollView}
+              contentContainerStyle={{ flexGrow: 1 }}
+              showsVerticalScrollIndicator={true}
+            >
+              {requests.map((item) => (
+                <View key={item.transaction_id} style={styles.transactionItem}>
+                  
+                  <TouchableOpacity activeOpacity={0.6}
+                    onPress={() => {
+                      setSelectedTransactionId(item.transaction_id);
+                      setNfcModalVisible(true);
+                    }}>
+                    <Ionicons name="card-outline" size={24} color={getRequestColor(item.status)}/>
+                  </TouchableOpacity>
+          
                   <View style={styles.transactionDetails}>
                     <Text style={styles.transactionName}>{item.description}</Text>
                   </View>
+          
                   <Text style={[styles.transactionAmount, { color: getRequestColor(item.status) }]}>
                     {item.amount.toLocaleString()} ₪
                   </Text>
                 </View>
-                ))}
-              </ScrollView>
-            </View>
+              ))}
+            </ScrollView>
+          </View>
+          
           )}
         </View>
         </View>
@@ -227,6 +223,14 @@ const MainKidScreen = () => {
       </View>
       
       <PaymentRequestModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
+
+      <NfcChargeModal visible={nfcModalVisible} onClose={() => {
+      setNfcModalVisible(false);
+      setSelectedTransactionId(undefined);
+      fetchAllData();
+      }} transactionId={selectedTransactionId} />
+
+
 
     </SafeAreaView>
   );

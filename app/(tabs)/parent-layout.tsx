@@ -27,6 +27,9 @@ export default function ParentScreen() {
     try {
       const response = await axios.get(`http://${LOCAL_IP}:3000/users/parents/${parentId}/children-payment-requests`);
       setPaymentRequests(response.data);
+      console.log(response
+        .data
+      )
     } catch (error) {
       console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
       setError('שגיאה בשליפת בקשות של ילדים');
