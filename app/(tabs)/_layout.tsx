@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
-import React, { useContext } from 'react';
+import { Tabs, useRouter } from 'expo-router';
+import React, { useContext, useEffect } from 'react';
 import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -7,10 +7,19 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AccountContext, AccountType } from '../_layout';
+import { AuthProvider, useAuth } from '../context/auth-context'; // ✅
 
-export default function TabLayout() {
+function TabScreens() {
   const colorScheme = useColorScheme();
-  const accountType = useContext(AccountContext)
+  const accountType = useContext(AccountContext);
+  const { token } = useAuth(); // ✅ check auth
+  const router = useRouter(); // ✅ router to redirect
+
+  useEffect(() => {
+    if (!token) {
+      router.replace('/'); // ✅ redirect to login if unauthenticated
+    }
+  }, [token]);
 
   return (
     <Tabs
@@ -20,13 +29,12 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-          },
+          ios: { position: 'absolute' },
           default: {},
         }),
-      }}>
-       <Tabs.Screen
+      }}
+    >
+      <Tabs.Screen
         name="savings"
         options={{
           title: 'חיסכון',
@@ -59,7 +67,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="parent"
         options={{
-          href: accountType === AccountType.PARENT ? "/parent-layout" : null,
           title: 'ראשי',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
@@ -75,4 +82,10 @@ export default function TabLayout() {
   );
 }
 
-
+export default function TabLayout() {
+  return (
+    <AuthProvider>
+      <TabScreens />
+    </AuthProvider>
+  );
+}
