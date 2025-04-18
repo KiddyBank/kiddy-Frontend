@@ -4,7 +4,6 @@ import axios from 'axios';
 import styles from '../styles/payment-request-modal.styles';
 import Constants from 'expo-constants';
 
-const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
 
 interface PaymentRequestModalProps {
   visible: boolean;
@@ -14,6 +13,8 @@ interface PaymentRequestModalProps {
 const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ visible, onClose }) => {
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
+  const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
   const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81';
 
@@ -22,7 +23,7 @@ const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ visible, onCl
 
     try {
       const response = await axios.post(
-        `http://${LOCAL_IP}:3000/child-balance/place-payment-request/${childId}`,
+        `http://${LOCAL_IP}:${LOCAL_PORT}/child-balance/place-payment-request/${childId}`,
         data,
         { headers: { 'Content-Type': 'application/json' } }
       );

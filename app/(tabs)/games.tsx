@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, Linking, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, Linking, TouchableOpacity, ScrollView, Image } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown'
 import styles from '../styles/games.styles';
 import { Link } from 'expo-router';

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
-import { useRouter } from 'expo-router'; // ✅ expo-router navigation
+import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
 
 export default function ParentSignup() {
-  const router = useRouter(); // ✅ get router instance
+  const router = useRouter();
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
+  const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
   const [form, setForm] = useState({
     name: '',
@@ -19,7 +22,7 @@ export default function ParentSignup() {
 
   const handleRegister = async () => {
     try {
-      await axios.post('http://localhost:3000/auth/register-parent', form);
+      await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/auth/register-parent`, form);
       alert('Parent registered! Please login.');
       router.push('/login-dialog');
     } catch (err) {

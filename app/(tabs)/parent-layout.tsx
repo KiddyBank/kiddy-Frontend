@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableHighlight, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableHighlight, FlatList, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import styles from '../styles/parent-layout.styles';
@@ -19,13 +19,14 @@ export default function ParentScreen() {
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [error, setError] = useState('');
   
-  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
+  const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
   const parentId = 'd1e5c471-d6a4-44f1-841a-a5aabef21128';
 
 
   const fetchPaymentRequests = async () => {
     try {
-      const response = await axios.get(`http://${LOCAL_IP}:3000/users/parents/${parentId}/children-payment-requests`);
+      const response = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${parentId}/children-payment-requests`);
       setPaymentRequests(response.data);
       console.log(response
         .data
@@ -38,7 +39,7 @@ export default function ParentScreen() {
 
   const approvePaymentRequest = async (transactionId: string) => {
     try {
-      await axios.post(`http://${LOCAL_IP}:3000/users/parents/${parentId}/accept-payment-request`, {
+      await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${parentId}/accept-payment-request`, {
         transactionId: transactionId
       });
             setPaymentRequests(prev => prev.filter(request => request.transaction_id !== transactionId));

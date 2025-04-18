@@ -51,15 +51,16 @@ const MainKidScreen = () => {
   const [requestsError, setRequestsError] = useState('');
 
   const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81'
-  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
+  const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
   const fetchAllData = async () => {
     try {
       const [balanceRes, transactionsRes, tasksRes, requestsRes] = await Promise.all([
-        axios.get(`http://${LOCAL_IP}:3000/users/balance/${childId}`),
-        axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=COMPLETED`),
-        axios.get(`http://${LOCAL_IP}:3000/users/tasks/${childId}`),
-        axios.get(`http://${LOCAL_IP}:3000/users/transactions/${childId}?transaction_status=APPROVED_BY_PARENT`), 
+        axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/balance/${childId}`),
+        axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/transactions/${childId}?transaction_status=COMPLETED`),
+        axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/tasks/${childId}`),
+        axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/transactions/${childId}?transaction_status=APPROVED_BY_PARENT`), 
       ]);
   
       setBalance(balanceRes.data.balance);
@@ -73,12 +74,15 @@ const MainKidScreen = () => {
       setRequestsError(''); 
     
     } catch (error) {
-      console.error('❌ שגיאה כללית:', error);
-      setError('שגיאה בשליפת יתרה 😢');
-      setTransactionsError('שגיאה בשליפת תנועות 😢');
-      setTasksError('שגיאה בשליפת משימות 😢');
-      setRequestsError('שגיאה בשליפת בקשות 😢');
-  };}
+      if (error instanceof Error) {
+        console.error('❌ !שגיאה כללית:', error.stack);
+        setError('שגיאה בשליפת יתרה 😢');
+        setTransactionsError('שגיאה בשליפת תנועות 😢');
+        setTasksError('שגיאה בשליפת משימות 😢');
+        }
+      }
+    };
+  
   
 
   useFocusEffect(

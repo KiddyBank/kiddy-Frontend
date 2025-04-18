@@ -1,28 +1,33 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import axios from 'axios';
-import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
+import { jwtDecode } from "jwt-decode";
+import React, { useState } from 'react';
+import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useAuth } from '../context/auth-context';
 
 export default function LoginDialog() {
   const [form, setForm] = useState({ email: '', password: '' });
-  const router = useRouter();
+  const { setToken, setRole, setSub } = useAuth();
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
+  const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://localhost:3000/auth/login', form);
-      const { access_token, role } = res.data;
+      const res = await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/auth/login`, form);
 
-      // Save token somewhere (SecureStore ideally)
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('role', role);
+      const { access_token, refresh_token } = res.data;
+      const decoded: any = jwtDecode(access_token);
 
-      // Navigate based on role
-      if (role === 'parent') {
-        router.replace('/parent-layout');
-      } else {
-        router.replace('/');
-      }
+      await SecureStore.setItemAsync('token', access_token);
+      await SecureStore.setItemAsync('refresh_token', refresh_token);
+
+      setToken(access_token);
+      setRole(decoded.role);
+      setSub(decoded.sub);
+
     } catch (err) {
+      console.error('Login error:', err);
       alert('Login failed');
     }
   };
@@ -33,12 +38,14 @@ export default function LoginDialog() {
       <TextInput
         placeholder="Email"
         onChangeText={(v) => setForm({ ...form, email: v })}
+        value={form.email}
         style={styles.input}
       />
       <TextInput
         placeholder="Password"
         secureTextEntry
         onChangeText={(v) => setForm({ ...form, password: v })}
+        value={form.password}
         style={styles.input}
       />
       <Button title="Login" onPress={handleLogin} />
