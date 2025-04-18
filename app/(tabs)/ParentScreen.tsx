@@ -7,11 +7,13 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import styles from '../styles/parent.styles';
 import AllowanceModal from '../popups/allowance-modal';
+
 
 type PaymentRequest = {
   transaction_id: string;
@@ -36,11 +38,11 @@ export default function ParentScreen() {
   const [children, setChildren] = useState<Child[]>([]);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
   const [selectedKid, setSelectedKid] = useState<Child | null>(null);
   const [showAllowanceModal, setShowAllowanceModal] = useState(false);
   const [allowanceAmount, setAllowanceAmount] = useState('');
   const [allowanceInterval, setAllowanceInterval] = useState<'monthly' | 'weekly' | 'test'>('monthly');
+  const [isLoading, setIsLoading] = useState(true);
 
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const parentId = 'd1e5c471-d6a4-44f1-841a-a5aabef21128';
@@ -58,9 +60,8 @@ export default function ParentScreen() {
   const fetchChildren = async () => {
     try {
       const response = await axios.get(`http://${LOCAL_IP}:3000/users/parents/${parentId}/children`);
-
       const converted: Child[] = response.data.map((kid: any) => ({
-        id: kid.user_id ?? kid.id, 
+        id: kid.user_id ?? kid.id,
         name: kid.username ?? kid.name,
         imageUrl: kid.imageUrl,
         balance: kid.balance,
@@ -68,14 +69,20 @@ export default function ParentScreen() {
         allowanceAmount: kid.allowanceAmount,
         allowanceInterval: kid.allowanceInterval,
       }));
-
-      console.log('👦 children:', converted);
       setChildren(converted);
     } catch (error) {
       console.error('❌ שגיאה בשליפת ילדים', error);
       setError('שגיאה בשליפת ילדים');
     }
   };
+
+  useEffect(() => {
+    const loadData = async () => {
+      await Promise.all([fetchPaymentRequests(), fetchChildren()]);
+      setIsLoading(false);
+    };
+    loadData();
+  }, []);
 
   const showMessage = (message: string) => {
     setSuccessMessage(message);
@@ -91,10 +98,7 @@ export default function ParentScreen() {
     }
   };
 
-  const handlePaymentRequest = async (
-    transactionId: string,
-    action: 'approve' | 'reject'
-  ) => {
+  const handlePaymentRequest = async (transactionId: string, action: 'approve' | 'reject') => {
     try {
       await axios.post(`http://${LOCAL_IP}:3000/users/parents/${parentId}/handle-payment-request`, {
         transactionId,
@@ -118,12 +122,9 @@ export default function ParentScreen() {
 
   const saveAllowance = async () => {
     if (!selectedKid) return;
-
-    console.log('📦 balanceId to save:', selectedKid.balanceId);
-
     try {
       await axios.post(`http://${LOCAL_IP}:3000/standing-orders/set-allowance`, {
-        balanceId: selectedKid.balanceId ,
+        balanceId: selectedKid.balanceId,
         amount: Number(allowanceAmount),
         daysFrequency: intervalToDays(allowanceInterval),
         startDate: new Date().toISOString().split('T')[0],
@@ -139,9 +140,6 @@ export default function ParentScreen() {
 
   const removeAllowance = async () => {
     if (!selectedKid) return;
-
-    console.log('🗑 removing balanceId:', selectedKid.balanceId);
-
     try {
       await axios.post(`http://${LOCAL_IP}:3000/standing-orders/remove/${selectedKid.balanceId}`);
       setShowAllowanceModal(false);
@@ -166,24 +164,25 @@ export default function ParentScreen() {
     }
   };
 
-  useEffect(() => {
-    fetchPaymentRequests();
-    fetchChildren();
-  }, []);
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 16, marginBottom: 10 }}>טוען נתונים...</Text>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.header}>יתרות הילדים</Text>
       </View>
-  
+
       <View style={styles.kidsContainer}>
         {children.map((kid, index) => (
           <View style={styles.kid} key={index}>
-            <TouchableOpacity
-              style={styles.allowanceBadge}
-              onPress={() => openAllowanceModal(kid)}
-            >
+            <TouchableOpacity style={styles.allowanceBadge} onPress={() => openAllowanceModal(kid)}>
               {kid.allowanceAmount ? (
                 <View style={styles.allowanceInfo}>
                   <Text style={styles.allowanceAmount}>{kid.allowanceAmount}₪</Text>
@@ -193,11 +192,11 @@ export default function ParentScreen() {
                 <Text style={styles.setAllowance}>+ הגדר דמי כיס</Text>
               )}
             </TouchableOpacity>
-  
+
             <TouchableHighlight onPress={() => toChild()}>
               <Image style={styles.image} source={{ uri: kid.imageUrl }} />
             </TouchableHighlight>
-  
+
             <View style={styles.kidDetails}>
               <Text style={styles.kidName}>{kid.name}</Text>
               <Text style={styles.kidBalance}>{kid.balance} ש"ח</Text>
@@ -205,7 +204,7 @@ export default function ParentScreen() {
           </View>
         ))}
       </View>
-  
+
       <View style={styles.nfcContainer}>
         <Text style={styles.sectionTitle}>בקשות תשלום ממתינות לאישור</Text>
         {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
@@ -235,7 +234,7 @@ export default function ParentScreen() {
           </View>
         ))}
       </View>
-  
+
       <AllowanceModal
         visible={showAllowanceModal}
         onClose={() => setShowAllowanceModal(false)}
@@ -249,5 +248,4 @@ export default function ParentScreen() {
       />
     </ScrollView>
   );
-  
 }
