@@ -108,20 +108,18 @@ const MainKidScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
-        showsVerticalScrollIndicator={false} 
-      >
-        <View style={styles.innerContainer}>
-  
-          {/* אזור ההיתרה */}
-          <View style={styles.header}>
+      {/* אזור ההיתרה */}
+      <View style={styles.header}>
             <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
             <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
             <Text style={styles.balanceLabel}>היתרה שלי</Text>
             {error !== '' && <Text style={styles.errorText}>{error}</Text>}
           </View>
-  
+
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false} 
+      >  
           {/* קניות אחרונות */}
           <View style={styles.transactionsContainer}>
             <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
@@ -172,11 +170,12 @@ const MainKidScreen = () => {
   
           {/* בקשות להורים */}
           <View style={styles.nfcContainer}>
-          <Text style={styles.sectionTitle}>בקשות שמחכות לאישור ההורים</Text>
+          <Text style={styles.sectionTitle}>בקשות שאושרו לחיוב</Text>
+          <Text style={styles.sectionSubtitle}>לחץ על האייקון כדי לבצע חיוב</Text>
 
           {requests.length === 0 ? (
             <View style={styles.emptySection}>
-              <Text style={styles.emptyText}>אין כרגע בקשות ממתינות</Text>
+              <Text style={styles.emptyText}>אין כרגע בקשות מאושרות</Text>
             </View>
           ) : (
             <View style={styles.nfcScrollViewContainer}>
@@ -209,7 +208,6 @@ const MainKidScreen = () => {
           </View>
           
           )}
-        </View>
         </View>
       </ScrollView>
 
