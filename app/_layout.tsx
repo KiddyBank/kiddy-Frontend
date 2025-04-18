@@ -39,7 +39,7 @@ export default function RootLayout() {
     if (accountType === AccountType.KID) {
       router.push('/');
     } else if (accountType === AccountType.PARENT) {
-      router.push('/parent-layout');
+      router.push('/ParentScreen');
     }
   }, [accountType]);
 

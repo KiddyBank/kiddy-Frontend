@@ -108,20 +108,18 @@ const MainKidScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
-        showsVerticalScrollIndicator={false} 
-      >
-        <View style={styles.innerContainer}>
-  
-          {/* אזור ההיתרה */}
-          <View style={styles.header}>
+      {/* אזור ההיתרה */}
+      <View style={styles.header}>
             <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
             <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
             <Text style={styles.balanceLabel}>היתרה שלי</Text>
             {error !== '' && <Text style={styles.errorText}>{error}</Text>}
           </View>
-  
+
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false} 
+      >  
           {/* קניות אחרונות */}
           <View style={styles.transactionsContainer}>
             <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
@@ -210,7 +208,6 @@ const MainKidScreen = () => {
           </View>
           
           )}
-        </View>
         </View>
       </ScrollView>
 

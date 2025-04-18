@@ -6,10 +6,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   
-  innerContainer: {
-    flex: 1,
-    paddingBottom: 20,
-  },
 
   sectionSubtitle: {
     fontSize: 14,
@@ -21,9 +17,11 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#3F51B5',
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    width: '100%',
+    marginBottom: 10,
   },
 
   profileImage: {

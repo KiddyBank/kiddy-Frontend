@@ -1,4 +1,3 @@
-// parent-layout.styles.ts
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
@@ -12,7 +11,7 @@ export default StyleSheet.create({
     backgroundColor: '#3F51B5',
     borderBottomRightRadius: 20,
     borderBottomLeftRadius: 20,
-    padding: 20,
+    padding: 30,
     marginBottom: 10,
   },
   header: {
@@ -20,6 +19,7 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
+    marginTop: 50,
   },
   kidsContainer: {
     width: '100%',
@@ -31,10 +31,10 @@ export default StyleSheet.create({
     justifyContent: 'flex-start',
     marginVertical: 10,
     gap: 20,
+    position: 'relative', 
   },
   kidDetails: {
     justifyContent: 'center',
-    alignItems: 'center',
     flexShrink: 1,
   },
   kidBalance: {
@@ -112,6 +112,51 @@ export default StyleSheet.create({
     color: '#4F8A10',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+
+  allowanceText: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#3F51B5',
+    marginTop: 5,
+  },
+
+  setAllowance: {
+    fontSize: 14,
+    color: '#3F51B5',
+    textDecorationLine: 'underline',
+    marginTop: 5,
+  },
+
+  allowanceBadge: {
+    position: 'absolute',
+    left: 0, 
+    top: '50%',
+    transform: [{ translateY: -12 }],
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
+  },
+  allowanceBadgeText: {
+    color: '#3F51B5',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  allowanceInfo: {
+    alignItems: 'center',
+  },
+  
+  allowanceAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3F51B5',
+  },
+  
+  allowanceInterval: {
+    fontSize: 12,
+    color: '#3F51B5',
   },
   
 });
