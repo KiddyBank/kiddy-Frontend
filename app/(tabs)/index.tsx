@@ -172,11 +172,12 @@ const MainKidScreen = () => {
   
           {/* בקשות להורים */}
           <View style={styles.nfcContainer}>
-          <Text style={styles.sectionTitle}>בקשות שמחכות לאישור ההורים</Text>
+          <Text style={styles.sectionTitle}>בקשות שאושרו לחיוב</Text>
+          <Text style={styles.sectionSubtitle}>לחץ על האייקון כדי לבצע חיוב</Text>
 
           {requests.length === 0 ? (
             <View style={styles.emptySection}>
-              <Text style={styles.emptyText}>אין כרגע בקשות ממתינות</Text>
+              <Text style={styles.emptyText}>אין כרגע בקשות מאושרות</Text>
             </View>
           ) : (
             <View style={styles.nfcScrollViewContainer}>

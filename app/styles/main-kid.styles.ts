@@ -11,6 +11,13 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
 
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+    textAlign: 'left',
+  },
+
   header: {
     backgroundColor: '#3F51B5',
     alignItems: 'center',

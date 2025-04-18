@@ -1,11 +1,9 @@
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableHighlight, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableHighlight, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import styles from '../styles/parent-layout.styles';
-
-
 
 type PaymentRequest = {
   transaction_id: string;
@@ -14,41 +12,70 @@ type PaymentRequest = {
   status: 'PENDING_PARENT_APPROVAL';
 };
 
+type Child = {
+  name: string;
+  imageUrl: string;
+  balance: number;
+};
+
 export default function ParentScreen() {
   const router = useRouter();
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
   const [error, setError] = useState('');
-  
-  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP
-  const parentId = 'd1e5c471-d6a4-44f1-841a-a5aabef21128';
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
+  const parentId = 'd1e5c471-d6a4-44f1-841a-a5aabef21128';
 
   const fetchPaymentRequests = async () => {
     try {
       const response = await axios.get(`http://${LOCAL_IP}:3000/users/parents/${parentId}/children-payment-requests`);
       setPaymentRequests(response.data);
-      console.log(response
-        .data
-      )
     } catch (error) {
       console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
       setError('שגיאה בשליפת בקשות של ילדים');
     }
   };
 
-  const approvePaymentRequest = async (transactionId: string) => {
+  const fetchChildren = async () => {
     try {
-      await axios.post(`http://${LOCAL_IP}:3000/users/parents/${parentId}/accept-payment-request`, {
-        transactionId: transactionId
-      });
-            setPaymentRequests(prev => prev.filter(request => request.transaction_id !== transactionId));
+      const response = await axios.get(`http://${LOCAL_IP}:3000/users/parents/${parentId}/children`);
+      setChildren(response.data);
     } catch (error) {
-      console.error("❌ Error approving payment request", error);
+      console.error('❌ שגיאה בשליפת ילדים', error);
+      setError('שגיאה בשליפת ילדים');
     }
   };
 
+  const showMessage = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(null), 2000);
+  };
+
+  const handlePaymentRequest = async (
+    transactionId: string,
+    action: 'approve' | 'reject'
+  ) => {
+    try {
+      await axios.post(`http://${LOCAL_IP}:3000/users/parents/${parentId}/handle-payment-request`, {
+        transactionId,
+        action,
+      });
+      setPaymentRequests(prev => prev.filter(req => req.transaction_id !== transactionId));
+      const message = action === 'approve' ? '✔️ בקשה אושרה בהצלחה' : '❌ הבקשה נדחתה בהצלחה';
+      showMessage(message);
+    } catch (error: any) {
+      console.error(`❌ שגיאה בביצוע פעולה (${action})`, error?.response?.data || error.message);
+      showMessage('⚠️ שגיאה בטיפול בבקשה');
+    }
+  };
+  
+  
+
   useEffect(() => {
     fetchPaymentRequests();
+    fetchChildren();
   }, []);
 
   const toChild = () => {
@@ -56,61 +83,55 @@ export default function ParentScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.header}>יתרות הילדים</Text>
       </View>
+
       <View style={styles.kidsContainer}>
-        <View style={styles.kid}>
-          <TouchableHighlight onPress={() => toChild()}>
-            <Image style={styles.image} source={{ uri: "https://www.lumosia.com/wp-content/uploads/2024/01/Child-Actor-Headshots-and-model-portfolios-139-768x1151.jpg" }} />
-          </TouchableHighlight>
-          <View style={styles.kidDetails}>
-            <Text style={styles.kidBalance}>1000</Text>
-            <Text style={styles.kidName}>Liron's Balance</Text>
+        {children.map((kid, index) => (
+          <View style={styles.kid} key={index}>
+            <TouchableHighlight onPress={() => toChild()}>
+              <Image style={styles.image} source={{ uri: kid.imageUrl }} />
+            </TouchableHighlight>
+            <View style={styles.kidDetails}>
+              <Text style={styles.kidName}>{kid.name}</Text>
+              <Text style={styles.kidBalance}>{kid.balance} ש"ח</Text>
+            </View>
           </View>
-        </View>
-
-        <View style={styles.kid}>
-          <TouchableHighlight onPress={() => toChild()}>
-            <Image style={styles.image} source={{ uri: "https://pauladeegan.co.uk/wp-content/uploads/2022/03/what-to-wear-for-kids-acting-headshots-banner.jpg" }} />
-          </TouchableHighlight>
-          <View style={styles.kidDetails}>
-            <Text style={styles.kidBalance}>500</Text>
-            <Text style={styles.kidName}>Emma's Balance</Text>
-          </View>
-        </View>
-
-        <View style={styles.kid}>
-          <TouchableHighlight onPress={() => toChild()}>
-            <Image style={styles.image} source={{ uri: "https://images.squarespace-cdn.com/content/v1/6204821bfe06b76898b431c5/1679513348194-TS0BIMV5Z21XXU1T6H4N/AW5A4201.jpg" }} />
-          </TouchableHighlight>
-          <View style={styles.kidDetails}>
-            <Text style={styles.kidBalance}>500</Text>
-            <Text style={styles.kidName}>George's Balance</Text>
-          </View>
-        </View>
+        ))}
       </View>
+
       <View style={styles.nfcContainer}>
         <Text style={styles.sectionTitle}>בקשות תשלום ממתינות לאישור</Text>
         {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
-        <FlatList
-          data={paymentRequests}
-          keyExtractor={(item) => item.transaction_id}
-          renderItem={({ item }) => (
-            <View style={styles.transactionRow}>
+        {successMessage && (
+          <View style={styles.successMessageBox}>
+            <Text style={styles.successMessageText}>{successMessage}</Text>
+          </View>
+        )}
+        {paymentRequests.map((item) => (
+          <View key={item.transaction_id} style={styles.transactionRow}>
+            <View style={{ flex: 1 }}>
               <Text style={styles.transactionText}>{item.description}</Text>
               <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
-              <TouchableOpacity
-                style={[styles.toggleButton, styles.pending]}
-                onPress={() => approvePaymentRequest(item.transaction_id)}
-              >
-                <Text style={styles.toggleButtonText}>אשר</Text>
-              </TouchableOpacity>
             </View>
-          )}
-        />
+            <TouchableOpacity
+              style={[styles.toggleButton, styles.approveButton]}
+              onPress={() => handlePaymentRequest(item.transaction_id, 'approve')}
+            >
+              <Text style={styles.toggleButtonText}>אשר</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.toggleButton, styles.rejectButton]}
+              onPress={() => handlePaymentRequest(item.transaction_id, 'reject')}
+            >
+              <Text style={styles.toggleButtonText}>סרב</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
