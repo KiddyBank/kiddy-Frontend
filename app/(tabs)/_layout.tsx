@@ -3,8 +3,8 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Tabs, useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import { Tabs } from 'expo-router';
+import React from 'react';
 import { Alert, Platform } from 'react-native';
 import { AccountType } from '../(app)/_layout';
 import { useAuth } from '../context/auth-context';
@@ -57,9 +57,10 @@ function TabScreens() {
         }}
       />
       <Tabs.Screen
-        name="parent"
+        name="parent-layout"  
         options={{
           title: 'ראשי',
+          href: role === AccountType.PARENT ? "/parent-layout" : null, 
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
@@ -75,13 +76,13 @@ function TabScreens() {
         options={{
           title: 'התנתקות', 
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="arrow.right.square.fill" color={color} />
+            <IconSymbol size={28} name="exit-to-app" color={color} />
           ),
 
         }}
         listeners={{
           tabPress: (e) => {
-            e.preventDefault(); // prevent actual screen change
+            e.preventDefault();
             confirmLogout();
           },
         }}

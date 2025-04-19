@@ -1,17 +1,13 @@
 import axios from "axios";
-import Constants from "expo-constants";
-import React, { useState, useRef, useEffect } from "react";
-import { Animated, Alert, Modal, View, TouchableOpacity, Button, Text } from "react-native";
-import styles from '../styles/nfc-pay.styles';
 import { Audio } from "expo-av";
-
-
+import Constants from "expo-constants";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Animated, Modal, Text, TouchableOpacity, View } from "react-native";
+import styles from '../styles/nfc-pay.styles';
+import { useAuth } from "../context/auth-context";
 
 const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
 const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
-
-const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81';
-
 
 interface NfcChargeModalProps {
   visible: boolean;
@@ -22,6 +18,8 @@ interface NfcChargeModalProps {
 const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , transactionId}) => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const animation = useRef(new Animated.Value(1)).current;
+  const {sub} = useAuth(); 
+
 
   const animateButton = () => {
     Animated.sequence([
@@ -61,7 +59,7 @@ const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , tran
 
     try {
       const response = await axios.post(
-        `http://${LOCAL_IP}:${LOCAL_PORT}/users/perform-payment/${childId}`,
+        `http://${LOCAL_IP}:${LOCAL_PORT}/users/perform-payment/${sub}`,
         {transactionId},
         { headers: { 'Content-Type': 'application/json' } }
       );

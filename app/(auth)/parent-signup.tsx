@@ -111,7 +111,6 @@ export default function ParentSignup() {
         ...parentForm,
         children
       };
-      console.log('Payload:', payload);
       await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/auth/register-parent`, payload);
       alert('ההרשמה בוצעה בהצלחה! כעת ניתן להתחבר.');
       router.replace('/login-dialog');

@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Modal, Button, Alert } from 'react-native';
 import axios from 'axios';
+import React, { useState } from 'react';
+import { Alert, Button, Modal, Text, TextInput, View } from 'react-native';
 import styles from '../styles/payment-request-modal.styles';
 import Constants from 'expo-constants';
+import { useAuth } from '../context/auth-context';
 
+const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
+const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
 interface PaymentRequestModalProps {
   visible: boolean;
@@ -13,17 +16,14 @@ interface PaymentRequestModalProps {
 const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ visible, onClose }) => {
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
-  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
-  const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
-
-  const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81';
+  const {sub} = useAuth(); 
 
   const handleSendClick = async () => {
     const data = { amount, description: message };
 
     try {
       const response = await axios.post(
-        `http://${LOCAL_IP}:${LOCAL_PORT}/child-balance/place-payment-request/${childId}`,
+        `http://${LOCAL_IP}:${LOCAL_PORT}/child-balance/place-payment-request/${sub}`,
         data,
         { headers: { 'Content-Type': 'application/json' } }
       );

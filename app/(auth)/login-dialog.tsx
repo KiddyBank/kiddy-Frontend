@@ -18,7 +18,6 @@ export default function LoginDialog() {
   const handleLogin = async () => {
     try {
       const res = await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/auth/login`, form);
-      console.log('Login response:', res.data);
 
       const { access_token, refresh_token } = res.data;
       const decoded: any = jwtDecode(access_token);

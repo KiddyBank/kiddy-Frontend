@@ -16,7 +16,8 @@ const MAPPING = {
   'piggybank.fill': 'savings',         
   'gamecontroller.fill': 'sports-esports',  
   'creditcard.fill': 'payment',        
-  'gearshape.fill': 'settings',    
+  'gearshape.fill': 'settings',
+  'exit-to-app': 'logout',  
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

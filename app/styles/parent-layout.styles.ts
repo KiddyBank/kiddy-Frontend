@@ -25,9 +25,8 @@ export default StyleSheet.create({
       kid: {
         display: 'flex',
         flexDirection: 'row-reverse',
-        flex: 1,
-        gap: 30,
-        margin: 20,
+        justifyContent: 'space-between',
+        padding: 70,
       },
       kidDetails: {
         display: 'flex',
@@ -41,7 +40,7 @@ export default StyleSheet.create({
       },
       kidName: {
         fontWeight: 'bold',
-        color: '#3F51B5',
+        color: '#3F51B5'
       },
       image: {
         width: 100,

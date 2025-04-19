@@ -4,8 +4,7 @@ import { View, Text, Image, TouchableHighlight, FlatList, TouchableOpacity } fro
 import axios from 'axios';
 import Constants from 'expo-constants';
 import styles from '../styles/parent-layout.styles';
-
-
+import { useAuth } from '../context/auth-context';
 
 type PaymentRequest = {
   transaction_id: string;
@@ -14,35 +13,47 @@ type PaymentRequest = {
   status: 'PENDING_PARENT_APPROVAL';
 };
 
+type Child = {
+  name: string;
+  balance: number;
+  imageUrl: string;
+};
+
 export default function ParentScreen() {
   const router = useRouter();
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
   const [error, setError] = useState('');
-  
+  const { sub } = useAuth(); 
+
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
-  const parentId = 'd1e5c471-d6a4-44f1-841a-a5aabef21128';
-
 
   const fetchPaymentRequests = async () => {
     try {
-      const response = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${parentId}/children-payment-requests`);
+      const response = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children-payment-requests`);
       setPaymentRequests(response.data);
-      console.log(response
-        .data
-      )
     } catch (error) {
       console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
       setError('שגיאה בשליפת בקשות של ילדים');
     }
   };
 
+  const fetchChildren = async () => {
+    try {
+      const response = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children`);
+      setChildren(response.data);
+    } catch (error) {
+      console.error('❌ Error fetching children', error);
+    }
+  };
+
   const approvePaymentRequest = async (transactionId: string) => {
     try {
-      await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${parentId}/accept-payment-request`, {
-        transactionId: transactionId
+      await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/accept-payment-request`, {
+        transactionId
       });
-            setPaymentRequests(prev => prev.filter(request => request.transaction_id !== transactionId));
+      setPaymentRequests(prev => prev.filter(request => request.transaction_id !== transactionId));
     } catch (error) {
       console.error("❌ Error approving payment request", error);
     }
@@ -50,6 +61,7 @@ export default function ParentScreen() {
 
   useEffect(() => {
     fetchPaymentRequests();
+    fetchChildren();
   }, []);
 
   const toChild = () => {
@@ -61,40 +73,36 @@ export default function ParentScreen() {
       <View style={styles.headerContainer}>
         <Text style={styles.header}>יתרות הילדים</Text>
       </View>
+
       <View style={styles.kidsContainer}>
-        <View style={styles.kid}>
-          <TouchableHighlight onPress={() => toChild()}>
-            <Image style={styles.image} source={{ uri: "https://www.lumosia.com/wp-content/uploads/2024/01/Child-Actor-Headshots-and-model-portfolios-139-768x1151.jpg" }} />
-          </TouchableHighlight>
-          <View style={styles.kidDetails}>
-            <Text style={styles.kidBalance}>1000</Text>
-            <Text style={styles.kidName}>Liron's Balance</Text>
+        {children.map((child, index) => (
+          
+          <View key={index} style={styles.kid}>
+            <TouchableHighlight onPress={() => toChild()}>
+              <Image
+                style={[styles.image, { marginBottom: 10 }]}
+                source={{
+                  uri: child.imageUrl || 'https://pauladeegan.co.uk/wp-content/uploads/2022/03/what-to-wear-for-kids-acting-headshots-banner.jpg',
+                }}
+              />
+            </TouchableHighlight>
+            <View style={[styles.kidDetails, { alignItems: 'center', padding: 5 }]}>
+              <Text style={[styles.kidBalance, { fontSize: 18, fontWeight: 'bold', color: '#333',  writingDirection: 'rtl' }]}>
+                {child.balance} ₪
+              </Text>
+              <Text style={[styles.kidName, { fontSize: 14, color: '#555',  }]}>
+                {child.name}
+              </Text>
+            </View>
+           
           </View>
-        </View>
-
-        <View style={styles.kid}>
-          <TouchableHighlight onPress={() => toChild()}>
-            <Image style={styles.image} source={{ uri: "https://pauladeegan.co.uk/wp-content/uploads/2022/03/what-to-wear-for-kids-acting-headshots-banner.jpg" }} />
-          </TouchableHighlight>
-          <View style={styles.kidDetails}>
-            <Text style={styles.kidBalance}>500</Text>
-            <Text style={styles.kidName}>Emma's Balance</Text>
-          </View>
-        </View>
-
-        <View style={styles.kid}>
-          <TouchableHighlight onPress={() => toChild()}>
-            <Image style={styles.image} source={{ uri: "https://images.squarespace-cdn.com/content/v1/6204821bfe06b76898b431c5/1679513348194-TS0BIMV5Z21XXU1T6H4N/AW5A4201.jpg" }} />
-          </TouchableHighlight>
-          <View style={styles.kidDetails}>
-            <Text style={styles.kidBalance}>500</Text>
-            <Text style={styles.kidName}>George's Balance</Text>
-          </View>
-        </View>
+        ))}
       </View>
+
       <View style={styles.nfcContainer}>
         <Text style={styles.sectionTitle}>בקשות תשלום ממתינות לאישור</Text>
         {error !== '' && <Text style={{ color: 'red' }}>{error}</Text>}
+
         <FlatList
           data={paymentRequests}
           keyExtractor={(item) => item.transaction_id}

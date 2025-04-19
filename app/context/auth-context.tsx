@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }: Props) => {
 
         if (savedToken) {
           const decoded: any = jwtDecode(savedToken);
-          console.log('Decoded JWT:', decoded);
           setToken(savedToken);
           setRole(decoded.role);
           setSub(decoded.sub);
@@ -58,10 +57,6 @@ export const AuthProvider = ({ children }: Props) => {
         console.error('Failed to load auth:', err);
         await SecureStore.deleteItemAsync('token');
       } finally {
-        console.log('Loading auth completed');
-        console.log('Token:', token);
-        console.log('Role:', role);
-        console.log('Sub:', sub);
         setLoading(false);
       }
     };

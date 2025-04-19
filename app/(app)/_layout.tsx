@@ -13,9 +13,7 @@ export default function AppLayout() {
   const { token, role, sub, loading } = useAuth(); 
 
   useEffect(() => {
-    console.log("started mounting app layout")
     if (loading) return;
-    console.log("role is", role);
 
     if (role === AccountType.PARENT) {
       router.replace('/parent-layout');
@@ -24,7 +22,6 @@ export default function AppLayout() {
     } else {
       router.replace('/login-dialog');
     }
-    console.log("finished mounting app layout")
   },  [token,sub,role, router, loading]);
 
 
