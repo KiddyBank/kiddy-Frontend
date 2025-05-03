@@ -1,19 +1,20 @@
-import { useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableHighlight,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-} from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ScrollView,
+  Text,
+  TouchableHighlight,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { useAuth } from '../context/auth-context';
 import styles from '../styles/parent.styles';
 import AllowanceModal from '../popups/allowance-modal';
-
 
 type PaymentRequest = {
   transaction_id: string;
@@ -24,8 +25,8 @@ type PaymentRequest = {
 
 type Child = {
   name: string;
-  imageUrl: string;
   balance: number;
+  imageUrl: string;
   id: string;
   balanceId: number;
   allowanceAmount?: number;
@@ -34,6 +35,8 @@ type Child = {
 
 export default function ParentScreen() {
   const router = useRouter();
+  const { sub } = useAuth();
+
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [children, setChildren] = useState<Child[]>([]);
   const [error, setError] = useState('');
@@ -45,11 +48,13 @@ export default function ParentScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
-  const parentId = 'd1e5c471-d6a4-44f1-841a-a5aabef21128';
+  const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
   const fetchPaymentRequests = async () => {
     try {
-      const response = await axios.get(`http://${LOCAL_IP}:3000/users/parents/${parentId}/children-payment-requests`);
+      const response = await axios.get(
+        `http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children-payment-requests`
+      );
       setPaymentRequests(response.data);
     } catch (error) {
       console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
@@ -59,7 +64,7 @@ export default function ParentScreen() {
 
   const fetchChildren = async () => {
     try {
-      const response = await axios.get(`http://${LOCAL_IP}:3000/users/parents/${parentId}/children`);
+      const response = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children`);
       const converted: Child[] = response.data.map((kid: any) => ({
         id: kid.user_id ?? kid.id,
         name: kid.username ?? kid.name,
@@ -76,40 +81,18 @@ export default function ParentScreen() {
     }
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      await Promise.all([fetchPaymentRequests(), fetchChildren()]);
-      setIsLoading(false);
-    };
-    loadData();
-  }, []);
-
-  const showMessage = (message: string) => {
-    setSuccessMessage(message);
-    setTimeout(() => setSuccessMessage(null), 2000);
-  };
-
-  const intervalToDays = (interval: 'monthly' | 'weekly' | 'test') => {
-    switch (interval) {
-      case 'monthly': return 30;
-      case 'weekly': return 7;
-      case 'test': return 0.0007;
-      default: return 30;
-    }
-  };
-
   const handlePaymentRequest = async (transactionId: string, action: 'approve' | 'reject') => {
     try {
-      await axios.post(`http://${LOCAL_IP}:3000/users/parents/${parentId}/handle-payment-request`, {
+      await axios.post(`http://${LOCAL_IP}:3000/users/parents/${sub}/handle-payment-request`, {
         transactionId,
         action,
       });
-      setPaymentRequests(prev => prev.filter(req => req.transaction_id !== transactionId));
+      setPaymentRequests((prev) => prev.filter((req) => req.transaction_id !== transactionId));
       const message = action === 'approve' ? 'בקשה אושרה בהצלחה' : 'הבקשה נדחתה בהצלחה';
-      showMessage(message);
+      alert(message);
     } catch (error: any) {
       console.error(`שגיאה בביצוע פעולה (${action})`, error?.response?.data || error.message);
-      showMessage('שגיאה בטיפול בבקשה');
+      alert('שגיאה בטיפול בבקשה');
     }
   };
 
@@ -131,10 +114,10 @@ export default function ParentScreen() {
       });
       setShowAllowanceModal(false);
       fetchChildren();
-      showMessage('דמי כיס נשמרו');
+      alert('דמי כיס נשמרו');
     } catch (err) {
       console.error('שגיאה בשמירת דמי כיס', err);
-      showMessage('שגיאה בשמירת דמי כיס');
+      alert('שגיאה בשמירת דמי כיס');
     }
   };
 
@@ -144,15 +127,11 @@ export default function ParentScreen() {
       await axios.post(`http://${LOCAL_IP}:3000/standing-orders/remove/${selectedKid.balanceId}`);
       setShowAllowanceModal(false);
       fetchChildren();
-      showMessage('דמי כיס הוסרו');
+      alert('דמי כיס הוסרו');
     } catch (err) {
       console.error('שגיאה בהסרת דמי כיס', err);
-      showMessage('שגיאה בהסרת דמי כיס');
+      alert('שגיאה בהסרת דמי כיס');
     }
-  };
-
-  const toChild = () => {
-    router.push('/');
   };
 
   const getIntervalLabel = (value?: string) => {
@@ -162,6 +141,19 @@ export default function ParentScreen() {
       case 'test': return 'בדיקה';
       default: return '';
     }
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      await fetchPaymentRequests();
+      await fetchChildren();
+      setIsLoading(false);
+    };
+    load();
+  }, []);
+
+  const toChild = () => {
+    router.push('/');
   };
 
   if (isLoading) {
@@ -193,7 +185,7 @@ export default function ParentScreen() {
               )}
             </TouchableOpacity>
 
-            <TouchableHighlight onPress={() => toChild()}>
+            <TouchableHighlight onPress={toChild}>
               <Image style={styles.image} source={{ uri: kid.imageUrl }} />
             </TouchableHighlight>
 
@@ -213,18 +205,21 @@ export default function ParentScreen() {
             <Text style={styles.successMessageText}>{successMessage}</Text>
           </View>
         )}
+
         {paymentRequests.map((item) => (
           <View key={item.transaction_id} style={styles.transactionRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.transactionText}>{item.description}</Text>
               <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
             </View>
+
             <TouchableOpacity
               style={[styles.toggleButton, styles.approveButton]}
               onPress={() => handlePaymentRequest(item.transaction_id, 'approve')}
             >
               <Text style={styles.toggleButtonText}>אשר</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={[styles.toggleButton, styles.rejectButton]}
               onPress={() => handlePaymentRequest(item.transaction_id, 'reject')}
@@ -248,4 +243,13 @@ export default function ParentScreen() {
       />
     </ScrollView>
   );
+}
+
+// Helper to convert interval to days
+function intervalToDays(interval: 'monthly' | 'weekly' | 'test'): number {
+  switch (interval) {
+    case 'monthly': return 30;
+    case 'weekly': return 7;
+    case 'test': return 1;
+  }
 }
