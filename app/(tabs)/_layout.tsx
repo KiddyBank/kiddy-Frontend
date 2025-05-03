@@ -59,6 +59,7 @@ function TabScreens() {
       <Tabs.Screen
         name="parent-layout"  
         options={{
+          href: accountType === AccountType.PARENT ? "/ParentScreen" : null,
           title: 'ראשי',
           href: role === AccountType.PARENT ? "/parent-layout" : null, 
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
