@@ -11,7 +11,7 @@ import { useAuth } from '../context/auth-context';
 
 function TabScreens() {
   const colorScheme = useColorScheme();
-  const { role,logout} = useAuth();
+  const { role, logout } = useAuth();
 
   const confirmLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -33,6 +33,14 @@ function TabScreens() {
         }),
       }}
     >
+      <Tabs.Screen
+        name="strategy-map"
+        options={{
+          href: role === AccountType.CHILD ? "/strategy-map" : null,
+          title: 'מפת התקדמות',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
+        }}
+      />
       <Tabs.Screen
         name="savings"
         options={{
@@ -57,11 +65,10 @@ function TabScreens() {
         }}
       />
       <Tabs.Screen
-        name="parent-layout"  
+        name="ParentScreen"
         options={{
-          href: accountType === AccountType.PARENT ? "/ParentScreen" : null,
+          href: role === AccountType.PARENT ? "/ParentScreen" : null,
           title: 'ראשי',
-          href: role === AccountType.PARENT ? "/parent-layout" : null, 
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
@@ -75,7 +82,7 @@ function TabScreens() {
       <Tabs.Screen
         name="logout"
         options={{
-          title: 'התנתקות', 
+          title: 'התנתקות',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="exit-to-app" color={color} />
           ),
@@ -94,6 +101,6 @@ function TabScreens() {
 
 export default function TabLayout() {
   return (
-      <TabScreens />
+    <TabScreens />
   );
 }

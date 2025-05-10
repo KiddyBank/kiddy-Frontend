@@ -13,11 +13,12 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'piggybank.fill': 'savings',         
-  'gamecontroller.fill': 'sports-esports',  
-  'creditcard.fill': 'payment',        
+  'piggybank.fill': 'savings',
+  'gamecontroller.fill': 'sports-esports',
+  'creditcard.fill': 'payment',
   'gearshape.fill': 'settings',
-  'exit-to-app': 'logout',  
+  'exit-to-app': 'logout',
+  'map.fill': 'map'
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],

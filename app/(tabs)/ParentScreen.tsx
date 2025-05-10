@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   Image,
   ScrollView,
   Text,
@@ -13,8 +12,8 @@ import {
   View
 } from 'react-native';
 import { useAuth } from '../context/auth-context';
-import styles from '../styles/parent.styles';
 import AllowanceModal from '../popups/allowance-modal';
+import styles from '../styles/parent.styles';
 
 type PaymentRequest = {
   transaction_id: string;

@@ -10,22 +10,22 @@ export enum AccountType {
 
 export default function AppLayout() {
   const router = useRouter();
-  const { token, role, sub, loading } = useAuth(); 
+  const { token, role, sub, loading } = useAuth();
 
   useEffect(() => {
     if (loading) return;
 
     if (role === AccountType.PARENT) {
-      router.replace('/parent-layout');
+      router.replace('/ParentScreen');
     } else if (role === AccountType.CHILD) {
       router.replace('/(tabs)');
     } else {
       router.replace('/login-dialog');
     }
-  },  [token,sub,role, router, loading]);
+  }, [token, sub, role, router, loading]);
 
 
   return (
-        <Slot />
+    <Slot />
   );
 }
