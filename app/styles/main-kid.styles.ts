@@ -6,17 +6,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   
-  innerContainer: {
-    flex: 1,
-    paddingBottom: 20,
+
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+    textAlign: 'left',
   },
 
   header: {
     backgroundColor: '#3F51B5',
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    width: '100%',
+    marginBottom: 10,
   },
 
   profileImage: {

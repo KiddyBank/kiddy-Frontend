@@ -1,13 +1,13 @@
 import axios from "axios";
+import { Audio } from "expo-av";
 import Constants from "expo-constants";
-import React, { useState, useRef } from "react";
-import { Animated, Alert, Modal, View, TouchableOpacity, Button, Text } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Animated, Modal, Text, TouchableOpacity, View } from "react-native";
 import styles from '../styles/nfc-pay.styles';
-
+import { useAuth } from "../context/auth-context";
 
 const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
-const childId = 'ac0d5b82-88cd-4d87-bdd6-3503602f6d81';
-
+const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
 interface NfcChargeModalProps {
   visible: boolean;
@@ -18,6 +18,8 @@ interface NfcChargeModalProps {
 const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , transactionId}) => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const animation = useRef(new Animated.Value(1)).current;
+  const {sub} = useAuth(); 
+
 
   const animateButton = () => {
     Animated.sequence([
@@ -33,13 +35,31 @@ const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , tran
       }),
     ]).start();
   };
+  
+    useEffect(() => {
+      startAnimation();
+    }, []);
+  
+    const startAnimation = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animation, { toValue: 1.2, duration: 800, useNativeDriver: true }),
+          Animated.timing(animation, { toValue: 1, duration: 800, useNativeDriver: true }),
+        ])
+      ).start();
+    };
+
+   const playSound = async () => {
+      const { sound } = await Audio.Sound.createAsync(require("../../assets/sounds/coins.mp3"));
+      await sound.playAsync();
+    };
 
   const proceedPayment = async () => {
     animateButton();
 
     try {
       const response = await axios.post(
-        `http://${LOCAL_IP}:3000/users/perform-payment/${childId}`,
+        `http://${LOCAL_IP}:${LOCAL_PORT}/users/perform-payment/${sub}`,
         {transactionId},
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -49,6 +69,7 @@ const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , tran
         Alert.alert('התשלום הושלם בהצלחה!');
         setTimeout(() => {
           setPaymentSuccess(false);
+          playSound();
           onClose();
         }, 3000);
       } else {

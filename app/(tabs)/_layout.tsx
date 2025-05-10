@@ -1,16 +1,24 @@
-import { Tabs } from 'expo-router';
-import React, { useContext } from 'react';
-import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AccountContext, AccountType } from '../_layout';
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { Alert, Platform } from 'react-native';
+import { AccountType } from '../(app)/_layout';
+import { useAuth } from '../context/auth-context';
 
-export default function TabLayout() {
+function TabScreens() {
   const colorScheme = useColorScheme();
-  const accountType = useContext(AccountContext)
+  const { role, logout } = useAuth();
+
+  const confirmLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', onPress: logout, style: 'destructive' },
+    ]);
+  };
 
   return (
     <Tabs
@@ -20,13 +28,20 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-          },
+          ios: { position: 'absolute' },
           default: {},
         }),
-      }}>
-       <Tabs.Screen
+      }}
+    >
+      <Tabs.Screen
+        name="strategy-map"
+        options={{
+          href: role === AccountType.CHILD ? "/strategy-map" : null,
+          title: 'מפת התקדמות',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="savings"
         options={{
           title: 'חיסכון',
@@ -36,30 +51,23 @@ export default function TabLayout() {
       <Tabs.Screen
         name="games"
         options={{
-          href: accountType === AccountType.KID ? "/games" : null,
+          href: role === AccountType.CHILD ? "/games" : null,
           title: 'משחקים',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="gamecontroller.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="nfc-pay"
-        options={{
-          title: 'תשלום',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="creditcard.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
-          href: accountType === AccountType.KID ? "/" : null,
+          href: role === AccountType.CHILD ? "/" : null,
           title: 'ראשי',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="parent"
+        name="ParentScreen"
         options={{
-          href: accountType === AccountType.PARENT ? "/parent-layout" : null,
+          href: role === AccountType.PARENT ? "/ParentScreen" : null,
           title: 'ראשי',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
@@ -71,8 +79,28 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="logout"
+        options={{
+          title: 'התנתקות',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="exit-to-app" color={color} />
+          ),
+
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            confirmLogout();
+          },
+        }}
+      />
     </Tabs>
   );
 }
 
-
+export default function TabLayout() {
+  return (
+    <TabScreens />
+  );
+}
