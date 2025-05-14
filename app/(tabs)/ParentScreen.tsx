@@ -14,6 +14,7 @@ import {
 import { useAuth } from '../context/auth-context';
 import AllowanceModal from '../popups/allowance-modal';
 import styles from '../styles/parent.styles';
+import TaskModal from '../popups/task-modal';
 
 type PaymentRequest = {
   transaction_id: string;
@@ -49,17 +50,8 @@ export default function ParentScreen() {
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
-  const fetchPaymentRequests = async () => {
-    try {
-      const response = await axios.get(
-        `http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children-payment-requests`
-      );
-      setPaymentRequests(response.data);
-    } catch (error) {
-      console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
-      setError('שגיאה בשליפת בקשות של ילדים');
-    }
-  };
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [taskList, setTaskList] = useState<any[]>([]);
 
   const fetchChildren = async () => {
     try {
@@ -80,6 +72,36 @@ export default function ParentScreen() {
     }
   };
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        await fetchPaymentRequests();
+        await fetchChildren();
+        await fetchTasks();
+      } catch (err) {
+        console.error('שגיאה בטעינת מסך ההורה:', err);
+        alert('שגיאה בטעינה');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+
+  //בקשות תשלום
+  const fetchPaymentRequests = async () => {
+    try {
+      const response = await axios.get(
+        `http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children-payment-requests`
+      );
+      setPaymentRequests(response.data);
+    } catch (error) {
+      console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
+      setError('שגיאה בשליפת בקשות של ילדים');
+    }
+  };
+
   const handlePaymentRequest = async (transactionId: string, action: 'approve' | 'reject') => {
     try {
       await axios.post(`http://${LOCAL_IP}:3000/users/parents/${sub}/handle-payment-request`, {
@@ -95,6 +117,7 @@ export default function ParentScreen() {
     }
   };
 
+  //דמי כיס
   const openAllowanceModal = (kid: Child) => {
     setSelectedKid(kid);
     setAllowanceAmount(kid.allowanceAmount?.toString() || '');
@@ -142,19 +165,6 @@ export default function ParentScreen() {
     }
   };
 
-  useEffect(() => {
-    const load = async () => {
-      await fetchPaymentRequests();
-      await fetchChildren();
-      setIsLoading(false);
-    };
-    load();
-  }, []);
-
-  const toChild = () => {
-    router.push('/');
-  };
-
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -163,6 +173,46 @@ export default function ParentScreen() {
       </View>
     );
   }
+
+  //מטלות
+  const fetchTasks = async () => {
+    try {
+      const res = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks`);
+      setTaskList(res.data);
+    } catch (err) {
+      console.error('שגיאה בשליפת מטלות', err);
+    }
+  };
+
+  const submitTask = async (taskForm: any) => {
+    try {
+      await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks`, {
+        ...taskForm,
+        payment_amount: Number(taskForm.payment_amount),
+        monthly_limit: Number(taskForm.monthly_limit),
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }, // או ממקור אחר
+      });
+  
+      setShowTaskModal(false);
+      fetchTasks();
+      alert('מטלה נוספה');
+    } catch (err) {
+      console.error('שגיאה בהוספת מטלה', err);
+      alert('שגיאה בהוספת מטלה');
+    }
+  };
+ 
+  const deleteTask = async (taskId: string) => {
+    try {
+      await axios.delete(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks/${taskId}`);
+      fetchTasks();
+    } catch (err) {
+      console.error('שגיאה במחיקת מטלה', err);
+    }
+  };
+  //
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -229,6 +279,25 @@ export default function ParentScreen() {
         ))}
       </View>
 
+      <View style={{ marginTop: 30, width: '90%' }}>
+        <Text style={styles.sectionTitle}>רשימת מטלות</Text>
+        {taskList.map(task => (
+          <View key={task.task_id} style={styles.transactionRow}>
+            <View style={{ flex: 1 }}>
+              <Text>{task.name}</Text>
+              <Text style={{ color: '#555' }}>{task.description}</Text>
+              <Text>{task.payment_amount} ₪</Text>
+            </View>
+            <TouchableOpacity onPress={() => deleteTask(task.task_id)}>
+              <Text style={{ color: 'red' }}>🗑️</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
+      <TouchableOpacity onPress={() => setShowTaskModal(true)} style={{ marginTop: 20, backgroundColor: '#3F51B5', padding: 12, borderRadius: 10 }}>
+        <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>+ הוסף מטלה</Text>
+      </TouchableOpacity>
+
       <AllowanceModal
         visible={showAllowanceModal}
         onClose={() => setShowAllowanceModal(false)}
@@ -240,6 +309,14 @@ export default function ParentScreen() {
         setAllowanceInterval={setAllowanceInterval}
         kidName={selectedKid?.name}
       />
+
+        <TaskModal
+          visible={showTaskModal}
+          onClose={() => setShowTaskModal(false)}
+          onSave={submitTask}
+          childrenList={children.map((c) => ({ id: c.id, name: c.name }))}
+        />
+
     </ScrollView>
   );
 }
