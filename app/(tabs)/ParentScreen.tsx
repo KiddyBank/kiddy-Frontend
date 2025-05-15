@@ -15,6 +15,7 @@ import { useAuth } from '../context/auth-context';
 import AllowanceModal from '../popups/allowance-modal';
 import styles from '../styles/parent.styles';
 import TaskModal from '../popups/task-modal';
+import * as SecureStore from 'expo-secure-store';
 
 type PaymentRequest = {
   transaction_id: string;
@@ -32,6 +33,7 @@ type Child = {
   allowanceAmount?: number;
   allowanceInterval?: 'monthly' | 'weekly' | 'test';
 };
+
 
 export default function ParentScreen() {
   const router = useRouter();
@@ -52,6 +54,13 @@ export default function ParentScreen() {
 
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [taskList, setTaskList] = useState<any[]>([]);
+
+  const avatarImages: Record<string, any> = {
+    '/avatars/avatar-boy.png': require('../../assets/images/avatars/avatar-boy.png'),
+    '/avatars/avatar-girl.png': require('../../assets/images/avatars/avatar-boy.png'),
+    '/avatars/avatar-dad.png': require('../../assets/images/avatars/avatar-dad.png'),
+    '/avatars/avatar-mom.png': require('../../assets/images/avatars/avatar-mom.png'),
+  };
 
   const fetchChildren = async () => {
     try {
@@ -89,6 +98,10 @@ export default function ParentScreen() {
   }, []);
 
 
+  const toChild = () => {
+    router.push('/');
+  };
+
   //בקשות תשלום
   const fetchPaymentRequests = async () => {
     try {
@@ -99,6 +112,15 @@ export default function ParentScreen() {
     } catch (error) {
       console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
       setError('שגיאה בשליפת בקשות של ילדים');
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      const res = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks`);
+      setTaskList(res.data);
+    } catch (err) {
+      console.error('שגיאה בשליפת מטלות', err);
     }
   };
 
@@ -174,26 +196,20 @@ export default function ParentScreen() {
     );
   }
 
-  //מטלות
-  const fetchTasks = async () => {
-    try {
-      const res = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks`);
-      setTaskList(res.data);
-    } catch (err) {
-      console.error('שגיאה בשליפת מטלות', err);
-    }
-  };
+
 
   const submitTask = async (taskForm: any) => {
     try {
+      const token = await SecureStore.getItemAsync('token');
+
       await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks`, {
         ...taskForm,
         payment_amount: Number(taskForm.payment_amount),
         monthly_limit: Number(taskForm.monthly_limit),
       }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }, // או ממקור אחר
+        headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       setShowTaskModal(false);
       fetchTasks();
       alert('מטלה נוספה');
@@ -202,7 +218,7 @@ export default function ParentScreen() {
       alert('שגיאה בהוספת מטלה');
     }
   };
- 
+
   const deleteTask = async (taskId: string) => {
     try {
       await axios.delete(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks/${taskId}`);
@@ -211,8 +227,9 @@ export default function ParentScreen() {
       console.error('שגיאה במחיקת מטלה', err);
     }
   };
+
   //
-  
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -235,7 +252,8 @@ export default function ParentScreen() {
             </TouchableOpacity>
 
             <TouchableHighlight onPress={toChild}>
-              <Image style={styles.image} source={{ uri: kid.imageUrl }} />
+              <Image style={styles.image} source={avatarImages[kid.imageUrl]}
+              />
             </TouchableHighlight>
 
             <View style={styles.kidDetails}>
@@ -310,12 +328,12 @@ export default function ParentScreen() {
         kidName={selectedKid?.name}
       />
 
-        <TaskModal
-          visible={showTaskModal}
-          onClose={() => setShowTaskModal(false)}
-          onSave={submitTask}
-          childrenList={children.map((c) => ({ id: c.id, name: c.name }))}
-        />
+      <TaskModal
+        visible={showTaskModal}
+        onClose={() => setShowTaskModal(false)}
+        onSave={submitTask}
+        childrenList={children.map((c) => ({ id: c.id, name: c.name }))}
+      />
 
     </ScrollView>
   );
