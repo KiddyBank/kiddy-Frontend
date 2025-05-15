@@ -1,27 +1,28 @@
-import React from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { LinearGradient } from 'expo-linear-gradient';
-import { FontAwesome5 } from '@expo/vector-icons';
 import { Level, LevelStatus } from '@/app/types/level';
+import { FontAwesome5 } from '@expo/vector-icons';
+import React from 'react';
+import { Dimensions, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+import { svgPathProperties } from 'svg-path-properties';
+
 
 const LEVEL_COLORS: Record<LevelStatus
     | string, string> = {
     [LevelStatus.Completed]: '#06d6a0',
-    [LevelStatus.InProgress]: 'rgb(238, 238, 37)',
-    [LevelStatus.Locked]: 'rgba(215, 215, 214, 0)',
+    [LevelStatus.InProgress]: 'rgb(231, 231, 52)',
+    [LevelStatus.Locked]: 'rgba(165, 164, 164, 0.91)',
     'Test': 'rgb(215, 215, 214)'
 };
 
 const LEVEL_BORDER_COLORS: Record<LevelStatus, string> = {
     [LevelStatus.Completed]: '#06d6a0',
     [LevelStatus.InProgress]: 'white',
-    [LevelStatus.Locked]: 'rgba(200, 200, 200, 0.53)',
+    [LevelStatus.Locked]: 'rgb(200, 200, 200)',
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const LEVEL_SIZE = 80;
-const ROW_HEIGHT = 120;
+const LEVEL_SIZE = 100;
+const ROW_HEIGHT = 160;
 const ITEMS_PER_ROW = 3;
 
 type Props = {
@@ -75,7 +76,10 @@ export const LevelMap: React.FC<Props> = ({ levels, onLevelPress }) => {
             style={{ flex: 1 }}
             contentContainerStyle={{ height: contentHeight, width: SCREEN_WIDTH }}
         >
-            <LinearGradient colors={['#c2f0c2', '#fefae0']} style={{ flex: 1 }}>
+            <ImageBackground
+                source={require('@/assets/images/financial-literacy.png')}
+                resizeMode="cover"
+                style={{ flex: 1 }}>
                 <View style={styles.content}>
                     <Svg
                         width={SCREEN_WIDTH}
@@ -119,29 +123,26 @@ export const LevelMap: React.FC<Props> = ({ levels, onLevelPress }) => {
                             if (isPartialYellow) {
                                 const progress = (startLevel.pointsEarned ?? 0) / (startLevel.pointsRequired ?? 1);
 
-                                const dashArray = dist; // This is the total length (considering 100% as the full length of the path)
-                                const yellowLength = progress * dashArray; // Portion for yellow
-                                const grayLength = dashArray - yellowLength; // Remainder for gray
+                                const properties = new svgPathProperties(segmentPath);
+                                const totalLength = properties.getTotalLength();
+                                const yellowLength = totalLength * progress;
 
                                 return (
                                     <React.Fragment key={`path-${startLevel.id}-${endLevel.id}`}>
-
-                                        {/* Gray part */}
                                         <Path
                                             d={segmentPath}
-                                            stroke={LEVEL_COLORS["Test"]}
+                                            stroke={LEVEL_COLORS[LevelStatus.Locked]}
                                             strokeWidth={8}
                                             strokeLinecap="round"
                                             fill="none"
                                         />
-                                        {/* Yellow part */}
                                         <Path
                                             d={segmentPath}
                                             stroke={LEVEL_COLORS[LevelStatus.InProgress]}
                                             strokeWidth={8}
                                             strokeLinecap="round"
                                             fill="none"
-                                            strokeDasharray={`${yellowLength},${grayLength}`} // Dash pattern: yellow first, then gray
+                                            strokeDasharray={`${yellowLength}, ${totalLength}`}
                                         />
                                     </React.Fragment>
                                 );
@@ -154,10 +155,11 @@ export const LevelMap: React.FC<Props> = ({ levels, onLevelPress }) => {
                                     <Path
                                         key={`path-${startLevel.id}-${endLevel.id}`}
                                         d={segmentPath}
-                                        stroke={LEVEL_COLORS["Test"]}
+                                        stroke={LEVEL_COLORS[LevelStatus.Locked]}
                                         strokeWidth={8}
                                         strokeLinecap="round"
                                         fill="none"
+
                                     />
                                 );
                             }
@@ -174,9 +176,6 @@ export const LevelMap: React.FC<Props> = ({ levels, onLevelPress }) => {
                             );
                         })}
                     </Svg>
-
-
-
 
                     {levelPositions.map((level) => (
                         <View
@@ -210,7 +209,7 @@ export const LevelMap: React.FC<Props> = ({ levels, onLevelPress }) => {
                         </View>
                     ))}
                 </View>
-            </LinearGradient>
+            </ImageBackground>
         </ScrollView>
     );
 };
@@ -235,13 +234,14 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 5,
         borderWidth: 2,
-        opacity: 0.1
+
     },
     levelText: {
         color: 'white',
         fontWeight: 'bold',
-        fontSize: 12,
+        fontSize: 11,
         marginTop: 4,
+        textAlign: 'center'
     },
     starsContainer: {
         position: 'absolute',

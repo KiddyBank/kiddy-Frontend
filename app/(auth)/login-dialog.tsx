@@ -1,17 +1,16 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from "jwt-decode";
 import React, { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../context/auth-context';
-import { useRouter } from 'expo-router';
-import { configureLayoutAnimationBatch } from 'react-native-reanimated/lib/typescript/core';
 
 export default function LoginDialog() {
   const [form, setForm] = useState({ email: '', password: '' });
   const { setToken, setRole, setSub } = useAuth();
-  const router = useRouter(); 
+  const router = useRouter();
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
@@ -36,7 +35,7 @@ export default function LoginDialog() {
   };
 
   const handleParentSignup = () => {
-    router.push('/parent-signup'); 
+    router.push('/parent-signup');
   };
 
   return (
@@ -67,17 +66,17 @@ export default function LoginDialog() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, justifyContent: 'center' },
   title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
-  input: { marginBottom: 12, padding: 10, borderWidth: 1, borderRadius: 5, textAlign: 'right', writingDirection: 'rtl'},
+  input: { marginBottom: 12, padding: 10, borderWidth: 1, borderRadius: 5, textAlign: 'right', writingDirection: 'rtl' },
   signupButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
   signupButton: {
-    backgroundColor: '#4CAF50', 
+    backgroundColor: '#4CAF50',
     padding: 12,
     borderRadius: 5,
-    marginTop: 20, 
+    marginTop: 20,
     alignItems: 'center',
   },
 });

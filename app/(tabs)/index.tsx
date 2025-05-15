@@ -15,6 +15,8 @@ import NfcChargeModal from '../popups/nfc-charge-modal';
 import PaymentRequestModal from '../popups/payment-request-modal';
 import styles from '../styles/main-kid.styles';
 import { useAuth } from '../context/auth-context';
+import { useEducationModal } from '@/hooks/useEducationalModal';
+import EducationalModal from '../popups/educational-modal';
 
 
 type Transaction = {
@@ -40,8 +42,8 @@ const MainKidScreen = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [nfcModalVisible, setNfcModalVisible] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState<string>();
-  const {sub} = useAuth(); 
-  
+  const { sub } = useAuth();
+
 
   const [error, setError] = useState('');
 
@@ -55,6 +57,13 @@ const MainKidScreen = () => {
 
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
+
+  const { handlePress, onClose, isVisible, contentUrl } = useEducationModal(
+    sub!,
+    'PLACE_PAYMENT_REQUEST',
+    () => setIsModalVisible(true)
+  );
+
 
   const fetchAllData = async () => {
     try {
@@ -114,66 +123,66 @@ const MainKidScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* אזור ההיתרה */}
       <View style={styles.header}>
-            <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
-            <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
-            <Text style={styles.balanceLabel}>היתרה שלי</Text>
-            {error !== '' && <Text style={styles.errorText}>{error}</Text>}
-          </View>
+        <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
+        <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
+        <Text style={styles.balanceLabel}>היתרה שלי</Text>
+        {error !== '' && <Text style={styles.errorText}>{error}</Text>}
+      </View>
 
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
-        showsVerticalScrollIndicator={false} 
-      >  
-          {/* קניות אחרונות */}
-          <View style={styles.transactionsContainer}>
-            <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
-            {transactions.length === 0 ? (
-              <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>כאן יופיעו הקניות שתעשה בחנויות או התשלומים שתקבל🛍️</Text>
-              </View>
-            ) : (
-              transactions.slice(0, 4).map((item) => (
-                <View key={item.transaction_id} style={styles.transactionItem}>
-                  <Ionicons
-                    name={getTransactionColor(item.type) === 'green' ? 'add-circle' : 'remove-circle'}
-                    size={24}
-                    color={getTransactionColor(item.type)}
-                  />
-                  <View style={styles.transactionDetails}>
-                    <Text style={styles.transactionName}>{item.description || '---'}</Text>
-                  </View>
-                  <Text style={[styles.transactionAmount, { color: getTransactionColor(item.type) }]}>
-                    {item.amount.toLocaleString()} ₪
-                  </Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* קניות אחרונות */}
+        <View style={styles.transactionsContainer}>
+          <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
+          {transactions.length === 0 ? (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptyText}>כאן יופיעו הקניות שתעשה בחנויות או התשלומים שתקבל🛍️</Text>
+            </View>
+          ) : (
+            transactions.slice(0, 4).map((item) => (
+              <View key={item.transaction_id} style={styles.transactionItem}>
+                <Ionicons
+                  name={getTransactionColor(item.type) === 'green' ? 'add-circle' : 'remove-circle'}
+                  size={24}
+                  color={getTransactionColor(item.type)}
+                />
+                <View style={styles.transactionDetails}>
+                  <Text style={styles.transactionName}>{item.description || '---'}</Text>
                 </View>
-              ))
-            )}
-          </View>
-
-          {/* משימות */}
-          <View style={styles.tasksContainer}>
-            <Text style={styles.sectionTitle}>עובדים ומרוויחים</Text>
-            {tasks.length === 0 ? (
-              <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>כאן יופיעו המשימות שתקבל 🎯</Text>
+                <Text style={[styles.transactionAmount, { color: getTransactionColor(item.type) }]}>
+                  {item.amount.toLocaleString()} ₪
+                </Text>
               </View>
-            ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tasksScrollView}>
-                {tasks.map((item) => (
-                  <View key={item.task_id} style={styles.taskItem}>
-                    <Text style={styles.taskText}>{item.name}</Text>
-                    <Text style={styles.taskReward}>{item.payment_amount.toLocaleString()} ₪</Text>
-                    <TouchableOpacity style={styles.taskButton}>
-                      <Text style={styles.taskButtonText}>בוצע</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </ScrollView>
-            )}
-          </View>
+            ))
+          )}
+        </View>
 
-          {/* בקשות להורים */}
-          <View style={styles.nfcContainer}>
+        {/* משימות */}
+        <View style={styles.tasksContainer}>
+          <Text style={styles.sectionTitle}>עובדים ומרוויחים</Text>
+          {tasks.length === 0 ? (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptyText}>כאן יופיעו המשימות שתקבל 🎯</Text>
+            </View>
+          ) : (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tasksScrollView}>
+              {tasks.map((item) => (
+                <View key={item.task_id} style={styles.taskItem}>
+                  <Text style={styles.taskText}>{item.name}</Text>
+                  <Text style={styles.taskReward}>{item.payment_amount.toLocaleString()} ₪</Text>
+                  <TouchableOpacity style={styles.taskButton}>
+                    <Text style={styles.taskButtonText}>בוצע</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+
+        {/* בקשות להורים */}
+        <View style={styles.nfcContainer}>
           <Text style={styles.sectionTitle}>בקשות שאושרו לחיוב</Text>
           <Text style={styles.sectionSubtitle}>לחץ על האייקון כדי לבצע חיוב</Text>
 
@@ -183,34 +192,34 @@ const MainKidScreen = () => {
             </View>
           ) : (
             <View style={styles.nfcScrollViewContainer}>
-            <ScrollView
-              style={styles.nfcScrollView}
-              contentContainerStyle={{ flexGrow: 1 }}
-              showsVerticalScrollIndicator={true}
-            >
-              {requests.map((item) => (
-                <View key={item.transaction_id} style={styles.transactionItem}>
-                  
-                  <TouchableOpacity activeOpacity={0.6}
-                    onPress={() => {
-                      setSelectedTransactionId(item.transaction_id);
-                      setNfcModalVisible(true);
-                    }}>
-                    <Ionicons name="card-outline" size={24} color={getRequestColor(item.status)}/>
-                  </TouchableOpacity>
-          
-                  <View style={styles.transactionDetails}>
-                    <Text style={styles.transactionName}>{item.description}</Text>
+              <ScrollView
+                style={styles.nfcScrollView}
+                contentContainerStyle={{ flexGrow: 1 }}
+                showsVerticalScrollIndicator={true}
+              >
+                {requests.map((item) => (
+                  <View key={item.transaction_id} style={styles.transactionItem}>
+
+                    <TouchableOpacity activeOpacity={0.6}
+                      onPress={() => {
+                        setSelectedTransactionId(item.transaction_id);
+                        setNfcModalVisible(true);
+                      }}>
+                      <Ionicons name="card-outline" size={24} color={getRequestColor(item.status)} />
+                    </TouchableOpacity>
+
+                    <View style={styles.transactionDetails}>
+                      <Text style={styles.transactionName}>{item.description}</Text>
+                    </View>
+
+                    <Text style={[styles.transactionAmount, { color: getRequestColor(item.status) }]}>
+                      {item.amount.toLocaleString()} ₪
+                    </Text>
                   </View>
-          
-                  <Text style={[styles.transactionAmount, { color: getRequestColor(item.status) }]}>
-                    {item.amount.toLocaleString()} ₪
-                  </Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-          
+                ))}
+              </ScrollView>
+            </View>
+
           )}
         </View>
       </ScrollView>
@@ -218,13 +227,16 @@ const MainKidScreen = () => {
       {/* כפתור קבוע בתחתית המסך */}
       <View style={styles.payButtonBackground}>
         <View style={styles.payButtonContainer}>
-          <TouchableOpacity style={styles.payButton} onPress={() => setIsModalVisible(true)}          >
+
+          <TouchableOpacity style={styles.payButton} onPress={() => handlePress()}          >
             <Text style={styles.payButtonText}>בקש מההורים לפתוח תשלום</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <PaymentRequestModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
+      <EducationalModal visible={isVisible} onClose={() => onClose()}
+        contentUrl={contentUrl!} />
 
       <NfcChargeModal visible={nfcModalVisible} onClose={() => {
         setNfcModalVisible(false);

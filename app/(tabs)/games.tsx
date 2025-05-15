@@ -21,27 +21,27 @@ interface VideoTypeChoice {
 
 const games: Game[] = [
   {
-    url: "https://www.financialfootball.com/", 
+    url: "https://www.financialfootball.com/",
     description: "Financial Football",
     image: "https://www.financialfootball.com/assets/images/FF_1200x628.jpg"
   },
   {
-    url: "https://flashmuseum.org/money-metropolis/", 
+    url: "https://flashmuseum.org/money-metropolis/",
     description: "Money Metropolis",
     image: "https://flashmuseum.org/wp-content/uploads/2023/06/Money_Metropolis_logo.png"
   },
   {
-    url: "https://tm4k.ala.org/games/money-trail/index.html", 
+    url: "https://tm4k.ala.org/games/money-trail/index.html",
     description: "Money Trail",
     image: "https://infographicjournal.com/wp-content/uploads/2015/07/money-trail.jpg"
   },
   {
-    url: "https://bizkids.com/games/", 
+    url: "https://bizkids.com/games/",
     description: "Bizkids",
     image: "https://image.pbs.org/contentchannels/Hkp9dLF-show-poster2x3-OnRPEWU.jpg"
   },
   {
-    url: "https://coindexter.com/", 
+    url: "https://coindexter.com/",
     description: "Coin Dexter",
     image: "https://boostcafe.org/wp-content/uploads/2017/01/Coindexter.jpg"
   },
@@ -49,128 +49,126 @@ const games: Game[] = [
 
 const savingsVideos: Media[] = [
   {
-    url: "https://www.youtube.com/watch?v=NIUuHzsVCEI&ab_channel=%D7%94%D7%A9%D7%A7%D7%A2%D7%95%D7%AA%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D%D7%A2%D7%9D%D7%91%D7%95%D7%9C%D7%99", 
+    url: "https://www.youtube.com/watch?v=NIUuHzsVCEI&ab_channel=%D7%94%D7%A9%D7%A7%D7%A2%D7%95%D7%AA%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D%D7%A2%D7%9D%D7%91%D7%95%D7%9C%D7%99",
     description: "בולי, השור הכי מגניב בעיר מסביר: מהו כסף?"
   },
   {
-    url: "https://www.youtube.com/watch?v=kWRXwe5Nq3M&ab_channel=%D7%A8%D7%A9%D7%95%D7%AA%D7%A9%D7%95%D7%A7%D7%94%D7%94%D7%95%D7%9F%2C%D7%91%D7%99%D7%98%D7%95%D7%97%D7%95%D7%97%D7%99%D7%A1%D7%9B%D7%95%D7%9F", 
+    url: "https://www.youtube.com/watch?v=kWRXwe5Nq3M&ab_channel=%D7%A8%D7%A9%D7%95%D7%AA%D7%A9%D7%95%D7%A7%D7%94%D7%94%D7%95%D7%9F%2C%D7%91%D7%99%D7%98%D7%95%D7%97%D7%95%D7%97%D7%99%D7%A1%D7%9B%D7%95%D7%9F",
     description: "משפחת שנקל מבינה שאם לא חוסכים בהתחלה בסוף לא נשאר מספיק..."
   },
   {
-    url: "https://www.youtube.com/watch?v=UndnbJsfM78&ab_channel=%D7%A8%D7%A9%D7%95%D7%AA%D7%A9%D7%95%D7%A7%D7%94%D7%94%D7%95%D7%9F%2C%D7%91%D7%99%D7%98%D7%95%D7%97%D7%95%D7%97%D7%99%D7%A1%D7%9B%D7%95%D7%9F", 
+    url: "https://www.youtube.com/watch?v=UndnbJsfM78&ab_channel=%D7%A8%D7%A9%D7%95%D7%AA%D7%A9%D7%95%D7%A7%D7%94%D7%94%D7%95%D7%9F%2C%D7%91%D7%99%D7%98%D7%95%D7%97%D7%95%D7%97%D7%99%D7%A1%D7%9B%D7%95%D7%9F",
     description: "משפחת שנקל מחנכת את הדור הבא להיות חסכנים ונבונים"
   },
   {
-    url: "https://www.youtube.com/watch?v=YhVwuJoY3ic&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93", 
+    url: "  ",
     description: "מה זה כסף? ומאיפה הוא הגיע?"
   },
 ];
 
 const wiseConsumerVideos: Media[] = [
   {
-    url: "https://www.youtube.com/watch?v=572qL-uQ73Y&ab_channel=%D7%A1%D7%A8%D7%98%D7%95%D7%A0%D7%99%D7%94%D7%93%D7%A8%D7%9B%D7%94%D7%9C%D7%94%D7%95%D7%A8%D7%99%D7%9D%D7%95%D7%99%D7%9C%D7%93%D7%99%D7%9D%D7%A9%D7%9C%D7%AA%D7%99%D7%A7%D7%99%D7%AA%D7%94%7CTIKITA.CO.IL", 
+    url: "https://www.youtube.com/watch?v=572qL-uQ73Y&ab_channel=%D7%A1%D7%A8%D7%98%D7%95%D7%A0%D7%99%D7%94%D7%93%D7%A8%D7%9B%D7%94%D7%9C%D7%94%D7%95%D7%A8%D7%99%D7%9D%D7%95%D7%99%D7%9C%D7%93%D7%99%D7%9D%D7%A9%D7%9C%D7%AA%D7%99%D7%A7%D7%99%D7%AA%D7%94%7CTIKITA.CO.IL",
     description: "משימת בלשים בסופר"
   },
   {
-    url: "https://www.youtube.com/watch?v=k2XHCh7SL38&ab_channel=%D7%A1%D7%A8%D7%98%D7%95%D7%A0%D7%99%D7%94%D7%93%D7%A8%D7%9B%D7%94%D7%9C%D7%94%D7%95%D7%A8%D7%99%D7%9D%D7%95%D7%99%D7%9C%D7%93%D7%99%D7%9D%D7%A9%D7%9C%D7%AA%D7%99%D7%A7%D7%99%D7%AA%D7%94%7CTIKITA.CO.IL", 
+    url: "https://www.youtube.com/watch?v=k2XHCh7SL38&ab_channel=%D7%A1%D7%A8%D7%98%D7%95%D7%A0%D7%99%D7%94%D7%93%D7%A8%D7%9B%D7%94%D7%9C%D7%94%D7%95%D7%A8%D7%99%D7%9D%D7%95%D7%99%D7%9C%D7%93%D7%99%D7%9D%D7%A9%D7%9C%D7%AA%D7%99%D7%A7%D7%99%D7%AA%D7%94%7CTIKITA.CO.IL",
     description: "דן מאוד אהב לקנות מותגים"
   },
   {
-    url: "https://www.youtube.com/watch?v=ENC-YWYZvKA&ab_channel=ORTIsrael", 
+    url: "https://www.youtube.com/watch?v=ENC-YWYZvKA&ab_channel=ORTIsrael",
     description: "שלבים בתהליך קנייה נכונה"
   },
 ];
 
 const moneySystemsVideos: Media[] = [
   {
-    url: "https://www.youtube.com/watch?v=pIiPOo_fIz8&ab_channel=%D7%94%D7%A9%D7%A7%D7%A2%D7%95%D7%AA%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D%D7%A2%D7%9D%D7%91%D7%95%D7%9C%D7%99", 
+    url: "https://www.youtube.com/watch?v=pIiPOo_fIz8&ab_channel=%D7%94%D7%A9%D7%A7%D7%A2%D7%95%D7%AA%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D%D7%A2%D7%9D%D7%91%D7%95%D7%9C%D7%99",
     description: "הצטרפו לבולי, השור המגניב, למסע מרתק בעולם הבנקים והריבית! "
   },
   {
-    url: "https://www.youtube.com/watch?v=ADKMARYFy_E&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93", 
+    url: "https://www.youtube.com/watch?v=ADKMARYFy_E&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93",
     description: "מה זה בנק? מה זו הלוואה? ומה זה ריבית?"
   },
   {
-    url: "https://www.youtube.com/watch?v=cs9lPymYPwM&ab_channel=%D7%9E%D7%98%D7%97%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%9C%D7%98%D7%9B%D7%A0%D7%95%D7%9C%D7%95%D7%92%D7%99%D7%94%D7%97%D7%99%D7%A0%D7%95%D7%9B%D7%99%D7%AA", 
+    url: "https://www.youtube.com/watch?v=cs9lPymYPwM&ab_channel=%D7%9E%D7%98%D7%97%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%9C%D7%98%D7%9B%D7%A0%D7%95%D7%9C%D7%95%D7%92%D7%99%D7%94%D7%97%D7%99%D7%A0%D7%95%D7%9B%D7%99%D7%AA",
     description: "חינוך פיננסי - הלוואות"
   },
 ];
 
 const financialManagementVideos: Media[] = [
   {
-    url: "https://www.youtube.com/watch?v=1i-H1Zr_k-M&ab_channel=%D7%9E%D7%99%D7%98%D7%91%D7%91%D7%99%D7%AA%D7%94%D7%A9%D7%A7%D7%A2%D7%95%D7%AA", 
+    url: "https://www.youtube.com/watch?v=1i-H1Zr_k-M&ab_channel=%D7%9E%D7%99%D7%98%D7%91%D7%91%D7%99%D7%AA%D7%94%D7%A9%D7%A7%D7%A2%D7%95%D7%AA",
     description: "הקשר בין הכנסות והוצאות, הקשר בין הכנסה ועבודה ואיך מנהלים תקציב"
   },
   {
-    url: "https://www.youtube.com/watch?v=qZtOtsSnE0Y&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93", 
+    url: "https://www.youtube.com/watch?v=qZtOtsSnE0Y&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93",
     description: "מהי כלכלה? עסקאות ושווקים."
   },
   {
-    url: "https://www.youtube.com/watch?v=89-ELno5Bgc&ab_channel=PilAnimation%D7%A4%D7%99%D7%9C%D7%90%D7%A0%D7%99%D7%9E%D7%A6%D7%99%D7%94", 
+    url: "https://www.youtube.com/watch?v=89-ELno5Bgc&ab_channel=PilAnimation%D7%A4%D7%99%D7%9C%D7%90%D7%A0%D7%99%D7%9E%D7%A6%D7%99%D7%94",
     description: "האוצר של משפחת שנקל - ניהול תקציב"
   },
 ];
 
 const jobAndTaxesVideos: Media[] = [
   {
-    url: "https://www.youtube.com/watch?v=EKP_T2IUXp0&list=PLRg1yDs6QuzI4417Enu7Yta0gXEMu9vn0&index=3&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93", 
+    url: "https://www.youtube.com/watch?v=EKP_T2IUXp0&list=PLRg1yDs6QuzI4417Enu7Yta0gXEMu9vn0&index=3&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93",
     description: "מה זו עבודה? ואיזה סוגי עבודות יש?"
   },
   {
-    url: "https://www.youtube.com/watch?v=-h9cgKnjniY&list=PLRg1yDs6QuzI4417Enu7Yta0gXEMu9vn0&index=4&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93", 
+    url: "https://www.youtube.com/watch?v=-h9cgKnjniY&list=PLRg1yDs6QuzI4417Enu7Yta0gXEMu9vn0&index=4&ab_channel=HiliMood-%D7%94%D7%99%D7%9C%D7%99%D7%9E%D7%95%D7%93",
     description: "מה זה עסק? מה זה סניף? ומה זה רשת?"
   },
   {
-    url: "https://www.youtube.com/watch?v=qyCXpr-ZDhE&ab_channel=EasyPeasyFinance", 
+    url: "https://www.youtube.com/watch?v=qyCXpr-ZDhE&ab_channel=EasyPeasyFinance",
     description: "מהם מיסים?"
   },
   {
-    url: "https://www.youtube.com/watch?v=rAhobLacBrs&ab_channel=Hey%21GuessWhat", 
+    url: "https://www.youtube.com/watch?v=rAhobLacBrs&ab_channel=Hey%21GuessWhat",
     description: "איך מיסים עובדים? ועובדות נוספות"
   },
 ];
 
 const videoTypesChoices: VideoTypeChoice[] = [
-  {displayText: "חיסכון", videos: savingsVideos},
-  {displayText: "צריכה נבונה", videos: wiseConsumerVideos},
-  {displayText: "הלוואות,בנק ופיקדונות", videos: moneySystemsVideos},
-  {displayText: "התנהלות כלכלית נכונה", videos: financialManagementVideos},
-  {displayText: "עבודה ומיסים", videos: jobAndTaxesVideos},
+  { displayText: "חיסכון", videos: savingsVideos },
+  { displayText: "צריכה נבונה", videos: wiseConsumerVideos },
+  { displayText: "הלוואות,בנק ופיקדונות", videos: moneySystemsVideos },
+  { displayText: "התנהלות כלכלית נכונה", videos: financialManagementVideos },
+  { displayText: "עבודה ומיסים", videos: jobAndTaxesVideos },
 ];
 
 async function openLink(url: string) {
   await Linking.openURL(url);
 }
 
-function getYoutubeThumbnail(url: string, quality?: string){
-  if(url){
-      let video_id, thumbnail, result;
-      if(result = url.match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/))
-      {
-          video_id = result.pop();
-      }
-      else if(result = url.match(/youtu.be\/(.{11})/))
-      {
-          video_id = result.pop();
+function getYoutubeThumbnail(url: string, quality?: string) {
+  if (url) {
+    let video_id, thumbnail, result;
+    if (result = url.match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/)) {
+      video_id = result.pop();
+    }
+    else if (result = url.match(/youtu.be\/(.{11})/)) {
+      video_id = result.pop();
+    }
+
+    if (video_id) {
+      if (typeof quality == "undefined") {
+        quality = 'high';
       }
 
-      if(video_id){
-          if(typeof quality == "undefined"){
-              quality = 'high';
-          }
-      
-          let quality_key = 'maxresdefault';
-          if(quality == 'low'){
-              quality_key = 'sddefault';
-          }else if(quality == 'medium'){
-              quality_key = 'mqdefault';
-          } else if (quality == 'high') {
-              quality_key = 'hqdefault';
-          }
-
-          thumbnail = "http://img.youtube.com/vi/"+video_id+"/"+quality_key+".jpg";
-          return thumbnail;
+      let quality_key = 'maxresdefault';
+      if (quality == 'low') {
+        quality_key = 'sddefault';
+      } else if (quality == 'medium') {
+        quality_key = 'mqdefault';
+      } else if (quality == 'high') {
+        quality_key = 'hqdefault';
       }
+
+      thumbnail = "http://img.youtube.com/vi/" + video_id + "/" + quality_key + ".jpg";
+      return thumbnail;
+    }
   }
   return "";
 }
@@ -210,7 +208,7 @@ export default function GameScreen() {
         showsVerticalScrollIndicator={false}
         dropdownStyle={styles.dropdownMenuStyle}
       />
-      
+
       <ScrollView horizontal>
         {chosenVideosType.videos.map(video => (
           <TouchableOpacity key={video.url} style={styles.card} onPress={() => openLink(video.url)}>
@@ -219,7 +217,7 @@ export default function GameScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      
+
       <Text style={styles.header}>משחקים</Text>
       <ScrollView horizontal>
         {games.map(game => (
