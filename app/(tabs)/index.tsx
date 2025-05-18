@@ -15,6 +15,8 @@ import NfcChargeModal from '../popups/nfc-charge-modal';
 import PaymentRequestModal from '../popups/payment-request-modal';
 import styles from '../styles/main-kid.styles';
 import { useAuth } from '../context/auth-context';
+import * as SecureStore from 'expo-secure-store';
+
 
 
 type Transaction = {
@@ -61,7 +63,9 @@ const MainKidScreen = () => {
       const [balanceRes, transactionsRes, tasksRes, requestsRes] = await Promise.all([
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/balance/${sub}`),
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/transactions/${sub}?transaction_status=COMPLETED`),
-        axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/tasks/${sub}`),
+        axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks/by-child`, {
+          headers: { Authorization: `Bearer ${await SecureStore.getItemAsync('token')}` },
+        }),
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/transactions/${sub}?transaction_status=APPROVED_BY_PARENT`),
       ]);
 

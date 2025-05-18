@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -35,6 +35,19 @@ export default function TaskModal({ visible, onClose, onSave, childrenList }: Ta
     child_ids: [],
   });
 
+  useEffect(() => {
+    if (visible) {
+      setForm({
+        name: '',
+        description: '',
+        payment_amount: '',
+        monthly_limit: '',
+        child_ids: [],
+      });
+    }
+  }, [visible]);
+
+
   const toggleChild = (id: string) => {
     setForm((prev) => ({
       ...prev,
@@ -43,6 +56,8 @@ export default function TaskModal({ visible, onClose, onSave, childrenList }: Ta
         : [...prev.child_ids, id],
     }));
   };
+
+  
 
   return (
     <Modal visible={visible} transparent animationType="slide">

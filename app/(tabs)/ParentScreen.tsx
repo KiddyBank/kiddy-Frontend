@@ -117,12 +117,20 @@ export default function ParentScreen() {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks`);
+      const token = await SecureStore.getItemAsync('token');
+
+      const res = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks/by-parent`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       setTaskList(res.data);
     } catch (err) {
       console.error('שגיאה בשליפת מטלות', err);
     }
   };
+
 
   const handlePaymentRequest = async (transactionId: string, action: 'approve' | 'reject') => {
     try {
@@ -146,6 +154,14 @@ export default function ParentScreen() {
     setAllowanceInterval(kid.allowanceInterval || 'monthly');
     setShowAllowanceModal(true);
   };
+
+  function intervalToDays(interval: 'monthly' | 'weekly' | 'test'): number {
+    switch (interval) {
+      case 'monthly': return 30;
+      case 'weekly': return 7;
+      case 'test': return 0;
+    }
+  }
 
   const saveAllowance = async () => {
     if (!selectedKid) return;
@@ -339,11 +355,3 @@ export default function ParentScreen() {
   );
 }
 
-// Helper to convert interval to days
-function intervalToDays(interval: 'monthly' | 'weekly' | 'test'): number {
-  switch (interval) {
-    case 'monthly': return 30;
-    case 'weekly': return 7;
-    case 'test': return 1;
-  }
-}
