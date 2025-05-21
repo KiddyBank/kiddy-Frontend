@@ -36,7 +36,7 @@ type PaymentRequest = {
 type Child = {
   name: string;
   balance: number;
-  imageUrl: string;
+  gender: string;
   id: string;
   balanceId: number;
   allowanceAmount?: number;
@@ -66,20 +66,13 @@ export default function ParentScreen() {
   const [refreshing, setRefreshing] = useState(false); 
 
 
-  const avatarImages: Record<string, any> = {
-    '/avatars/avatar-boy.png': require('../../assets/images/avatars/avatar-boy.png'),
-    '/avatars/avatar-girl.png': require('../../assets/images/avatars/avatar-boy.png'),
-    '/avatars/avatar-dad.png': require('../../assets/images/avatars/avatar-dad.png'),
-    '/avatars/avatar-mom.png': require('../../assets/images/avatars/avatar-mom.png'),
-  };
-
   const fetchChildren = async () => {
     try {
       const response = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children`);
       const converted: Child[] = response.data.map((kid: any) => ({
         id: kid.user_id ?? kid.id,
         name: kid.username ?? kid.name,
-        imageUrl: kid.imageUrl,
+        gender: kid.gender,
         balance: kid.balance,
         balanceId: kid.balanceId,
         allowanceAmount: kid.allowanceAmount,
@@ -111,8 +104,6 @@ export default function ParentScreen() {
 
   useEffect(() => {
     const load = async () => {
-      const token = await SecureStore.getItemAsync('token');
-    console.log('🎟️ JWT token:', token); // ✅ תראי את הטוקן בקונסולה
       setIsLoading(true);
       await loadData();
       setIsLoading(false);
@@ -216,14 +207,22 @@ export default function ParentScreen() {
     }
   };
 
-  const getIntervalLabel = (value?: string) => {
+  const getIntervalLabel = (value?: string | number) => {
     switch (value) {
-      case 'monthly': return 'חודשי';
-      case 'weekly': return 'שבועי';
-      case 'test': return 'בדיקה';
-      default: return '';
+      case 'monthly':
+      case 30:
+        return 'חודשי';
+      case 'weekly':
+      case 7:
+        return 'שבועי';
+      case 'test':
+      case 0:
+        return 'דקתי';
+      default:
+        return '';
     }
   };
+
 
   if (isLoading) {
     return (
@@ -233,7 +232,6 @@ export default function ParentScreen() {
       </View>
     );
   }
-
 
 
   const submitTask = async (taskForm: any) => {
@@ -266,9 +264,6 @@ export default function ParentScreen() {
     }
   };
 
-  //
-
-
   return (
       <ScrollView
         contentContainerStyle={styles.container}
@@ -287,8 +282,8 @@ export default function ParentScreen() {
             <TouchableOpacity style={styles.allowanceBadge} onPress={() => openAllowanceModal(kid)}>
               {kid.allowanceAmount ? (
                 <View style={styles.allowanceInfo}>
-                  <Text style={styles.allowanceAmount}>{kid.allowanceAmount}₪</Text>
-                  <Text style={styles.allowanceInterval}>{getIntervalLabel(kid.allowanceInterval)}</Text>
+                  <Text style={styles.allowanceAmount}>דמי כיס</Text>
+                  <Text style={styles.allowanceAmount}>{kid.allowanceAmount}₪ {getIntervalLabel(kid.allowanceInterval)}</Text>
                 </View>
               ) : (
                 <Text style={styles.setAllowance}>+ הגדר דמי כיס</Text>
@@ -296,7 +291,13 @@ export default function ParentScreen() {
             </TouchableOpacity>
 
             <TouchableHighlight onPress={toChild}>
-              <Image style={styles.image} source={avatarImages[kid.imageUrl]}
+              <Image
+                style={styles.image}
+                source={
+                  kid.gender === 'female'
+                    ? require('../../assets/images/avatars/avatar-girl.png')
+                    : require('../../assets/images/avatars/avatar-boy.png')
+                }
               />
             </TouchableHighlight>
 
@@ -321,27 +322,24 @@ export default function ParentScreen() {
           <View key={item.transaction_id} style={styles.transactionRow}>
 
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text style={styles.transactionKidName}>
-                {item.child_balance?.child_user?.username}: {item.description}
-              </Text>
-              <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
+              <Text style={styles.titleText}>{item.child_balance?.child_user?.username} רוצה לחייב {item.amount}₪ </Text>
+              <Text style={styles.descriptionText}>הודעת הבקשה: {item.description}</Text>
             </View>
 
-            <View style={{ justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+            <View style={styles.toggleButtonsContainer}>
               <TouchableOpacity
                 style={[styles.toggleButton, styles.approveButton]}
-                onPress={() => handlePaymentRequest(item.transaction_id, 'approve')}
-              >
-                <Text style={styles.toggleButtonText}>אישור</Text>
+                onPress={() => handlePaymentRequest(item.transaction_id, 'approve')}>
+                <Text style={styles.toggleButtonText}>✓</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.toggleButton, styles.rejectButton]}
-                onPress={() => handlePaymentRequest(item.transaction_id, 'reject')}
-              >
-                <Text style={styles.toggleButtonText}>סירוב</Text>
+                onPress={() => handlePaymentRequest(item.transaction_id, 'reject')}>
+                <Text style={styles.toggleButtonText}>X</Text>
               </TouchableOpacity>
             </View>
+
 
           </View>
         ))}
@@ -352,19 +350,22 @@ export default function ParentScreen() {
         {taskList.map(task => (
           <View key={task.task_id} style={styles.taskRow}>
             <View style={styles.taskDetailsContainer}>
-              <Text style={styles.transactionKidName}>₪{task.payment_amount} - {task.name}</Text>
-              <Text style={styles.taskDescription}>{task.description}</Text>
+              <Text style={styles.titleText}>רווח של {task.payment_amount}₪ עבור {task.name}</Text>
+              <Text style={styles.descriptionText}>{task.description}</Text>
+              <Text style={styles.descriptionText}>פתוח עבור- {task.child_names.join(', ')}</Text>
             </View>
+
             <TouchableOpacity onPress={() => deleteTask(task.task_id)}>
-              <Text style={{ color: 'red' }}>🗑️</Text>
+              <Text style={styles.trashIcon}>🗑️</Text>
             </TouchableOpacity>
           </View>
         ))}
 
       </View>
-      <TouchableOpacity onPress={() => setShowTaskModal(true)} style={{ marginTop: 20, backgroundColor: '#3F51B5', padding: 12, borderRadius: 10 }}>
-        <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>+ הוסף מטלה</Text>
+      <TouchableOpacity onPress={() => setShowTaskModal(true)} style={styles.addTaskButton}>
+        <Text style={styles.addTaskButtonText}>+ הוסף מטלה</Text>
       </TouchableOpacity>
+
 
       <AllowanceModal
         visible={showAllowanceModal}

@@ -38,13 +38,17 @@ export default StyleSheet.create({
     flexShrink: 1,
   },
   kidBalance: {
-    fontSize: 30,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#3F51B5',
   },
   kidName: {
     fontWeight: 'bold',
     color: '#3F51B5',
+    fontSize: 20,
+    textAlign: 'right',          
+    writingDirection: 'rtl',      
+    alignSelf: 'flex-end',
   },
   image: {
     width: 80,
@@ -88,19 +92,28 @@ export default StyleSheet.create({
     marginHorizontal: 10,
   },
 
-  transactionKidName: {
-    fontSize: 14,
+  titleText: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'right',
   },
 
+  descriptionText: {
+  fontSize: 17,
+  color: '#555',
+  textAlign: 'right',
+  writingDirection: 'rtl',
+},
+
   toggleButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    marginHorizontal: 4,
-  },
+  paddingVertical: 6,
+  paddingHorizontal: 6,    
+  borderRadius: 10,          
+  minWidth: 40,
+  alignItems: 'center',
+  shadowColor: '#000',
+},
   approveButton: {
     backgroundColor: 'green',
   },
@@ -153,7 +166,6 @@ export default StyleSheet.create({
   allowanceBadgeText: {
     color: '#3F51B5',
     fontSize: 12,
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   allowanceInfo: {
@@ -161,16 +173,10 @@ export default StyleSheet.create({
   },
   
   allowanceAmount: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 13,
     color: '#3F51B5',
   },
   
-  allowanceInterval: {
-    fontSize: 12,
-    color: '#3F51B5',
-  },
-
   taskRow: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
@@ -195,13 +201,44 @@ taskName: {
   writingDirection: 'rtl',
 },
 
-taskDescription: {
+toggleButtonsContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: 10, 
+  marginTop: 8,
+},
+
+assignedChildrenText: {
   fontSize: 14,
   color: '#555',
   textAlign: 'right',
-  writingDirection: 'rtl',
+  marginTop: 4,
 },
 
 
-  
+addTaskButton: {
+  marginTop: 20,
+  backgroundColor: '#3F51B5',
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  borderRadius: 10,
+  alignItems: 'center',
+  alignSelf: 'center', 
+  minWidth: 140,
+},
+
+addTaskButtonText: {
+  color: 'white',
+  textAlign: 'center',
+  fontWeight: 'bold',
+  fontSize: 16,
+},
+
+trashIcon: {
+  fontSize: 20, 
+  textAlign: 'center',
+  paddingHorizontal: 6,
+},
+
 });

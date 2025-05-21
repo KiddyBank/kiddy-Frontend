@@ -25,15 +25,17 @@ interface Child {
   email: string;
   dateOfBirth: string;
   gender: Gender;
+  avatar_path?: string;
 }
 
 interface ParentForm {
   username: string;
-  lastName: string; // ✅ Added lastName field
+  lastName: string; 
   email: string;
   password: string;
   dateOfBirth: string;
   gender: Gender;
+  avatar_path?: string;
 }
 
 export default function ParentSignup() {
@@ -43,7 +45,7 @@ export default function ParentSignup() {
 
   const [parentForm, setParentForm] = useState<ParentForm>({
     username: '',
-    lastName: '', // ✅ Initialize lastName
+    lastName: '', 
     email: '',
     password: '',
     dateOfBirth: '',
@@ -60,11 +62,25 @@ export default function ParentSignup() {
 
   const handleParentChange = (field: keyof ParentForm, value: string) => {
     if (field === 'gender') {
-      setParentForm(prev => ({ ...prev, [field]: value as Gender }));
+      const genderValue = value as Gender;
+
+      const avatar_path =
+        genderValue === Gender.FEMALE
+          ? '/avatars/avatar-mom.png'
+          : genderValue === Gender.MALE
+          ? '/avatars/avatar-dad.png'
+          : undefined;
+
+      setParentForm(prev => ({
+        ...prev,
+        gender: genderValue,
+        avatar_path, 
+      }));
     } else {
       setParentForm(prev => ({ ...prev, [field]: value }));
     }
   };
+
 
   const handleDateChange = (_event: any, date?: Date) => {
     setShowDatePicker(false);
@@ -86,13 +102,22 @@ export default function ParentSignup() {
 
   const handleChildChange = (index: number, field: keyof Child, value: string) => {
     const updated = [...children];
+
     if (field === 'gender') {
-      updated[index][field] = value as Gender;
+      updated[index].gender = value as Gender;
+
+      updated[index].avatar_path =
+        value === Gender.FEMALE
+          ? '/avatars/avatar-girl.png'
+          : value === Gender.MALE
+          ? '/avatars/avatar-boy.png'
+          : undefined;
     } else {
       updated[index][field] = value;
     }
     setChildren(updated);
   };
+
 
   const addChild = () => {
     setChildren([...children, { username: '', email: '', dateOfBirth: '', gender: Gender.OTHER }]);
@@ -222,7 +247,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     textAlign: 'right',
-    writingDirection: 'rtl', // ✅ this helps the cursor and text flow behave like RTL
+    writingDirection: 'rtl', 
   },
   childSection: {
     marginBottom: 20,
