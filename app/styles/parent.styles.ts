@@ -61,9 +61,12 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     color: '#3F51B5',
     marginBottom: 10,
+    textAlign: 'right',          
+    writingDirection: 'rtl',      
+    alignSelf: 'flex-end',
   },
   transactionRow: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse', 
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 8,
@@ -71,18 +74,27 @@ export default StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 10,
+    gap: 10,
   },
   transactionText: {
-    flex: 1,
     fontSize: 16,
-    marginRight: 8,
+    textAlign: 'right',
   },
   transactionAmount: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#3F51B5',
+    textAlign: 'right',
     marginHorizontal: 10,
   },
+
+  transactionKidName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'right',
+  },
+
   toggleButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -158,5 +170,38 @@ export default StyleSheet.create({
     fontSize: 12,
     color: '#3F51B5',
   },
+
+  taskRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+  },
+
+taskDetailsContainer: {
+  flex: 1,
+  alignItems: 'flex-end',
+},
+
+taskName: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#3F51B5',
+  textAlign: 'right',
+  writingDirection: 'rtl',
+},
+
+taskDescription: {
+  fontSize: 14,
+  color: '#555',
+  textAlign: 'right',
+  writingDirection: 'rtl',
+},
+
+
   
 });

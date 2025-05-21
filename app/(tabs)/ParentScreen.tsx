@@ -1,10 +1,11 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableHighlight,
@@ -17,12 +18,20 @@ import styles from '../styles/parent.styles';
 import TaskModal from '../popups/task-modal';
 import * as SecureStore from 'expo-secure-store';
 
+
 type PaymentRequest = {
   transaction_id: string;
   description: string;
   amount: number;
   status: 'PENDING_PARENT_APPROVAL';
+  child_balance: {
+    child_user: {
+      username: ReactNode;
+      name: string;
+    };
+  };
 };
+
 
 type Child = {
   name: string;
@@ -54,6 +63,8 @@ export default function ParentScreen() {
 
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [taskList, setTaskList] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false); 
+
 
   const avatarImages: Record<string, any> = {
     '/avatars/avatar-boy.png': require('../../assets/images/avatars/avatar-boy.png'),
@@ -81,22 +92,33 @@ export default function ParentScreen() {
     }
   };
 
+  const loadData = async () => {
+    try {
+      await fetchPaymentRequests();
+      await fetchChildren();
+      await fetchTasks();
+    } catch (err) {
+      console.error('שגיאה בטעינת מסך ההורה:', err);
+      alert('שגיאה בטעינה');
+    }
+  };
+ 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
   useEffect(() => {
     const load = async () => {
-      try {
-        await fetchPaymentRequests();
-        await fetchChildren();
-        await fetchTasks();
-      } catch (err) {
-        console.error('שגיאה בטעינת מסך ההורה:', err);
-        alert('שגיאה בטעינה');
-      } finally {
-        setIsLoading(false);
-      }
+      const token = await SecureStore.getItemAsync('token');
+    console.log('🎟️ JWT token:', token); // ✅ תראי את הטוקן בקונסולה
+      setIsLoading(true);
+      await loadData();
+      setIsLoading(false);
     };
     load();
   }, []);
-
 
   const toChild = () => {
     router.push('/');
@@ -248,7 +270,13 @@ export default function ParentScreen() {
 
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+
       <View style={styles.headerContainer}>
         <Text style={styles.header}>יתרות הילדים</Text>
       </View>
@@ -291,24 +319,30 @@ export default function ParentScreen() {
 
         {paymentRequests.map((item) => (
           <View key={item.transaction_id} style={styles.transactionRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.transactionText}>{item.description}</Text>
+
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Text style={styles.transactionKidName}>
+                {item.child_balance?.child_user?.username}: {item.description}
+              </Text>
               <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
             </View>
 
-            <TouchableOpacity
-              style={[styles.toggleButton, styles.approveButton]}
-              onPress={() => handlePaymentRequest(item.transaction_id, 'approve')}
-            >
-              <Text style={styles.toggleButtonText}>אשר</Text>
-            </TouchableOpacity>
+            <View style={{ justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+              <TouchableOpacity
+                style={[styles.toggleButton, styles.approveButton]}
+                onPress={() => handlePaymentRequest(item.transaction_id, 'approve')}
+              >
+                <Text style={styles.toggleButtonText}>אישור</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.toggleButton, styles.rejectButton]}
-              onPress={() => handlePaymentRequest(item.transaction_id, 'reject')}
-            >
-              <Text style={styles.toggleButtonText}>סרב</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleButton, styles.rejectButton]}
+                onPress={() => handlePaymentRequest(item.transaction_id, 'reject')}
+              >
+                <Text style={styles.toggleButtonText}>סירוב</Text>
+              </TouchableOpacity>
+            </View>
+
           </View>
         ))}
       </View>
@@ -316,17 +350,17 @@ export default function ParentScreen() {
       <View style={{ marginTop: 30, width: '90%' }}>
         <Text style={styles.sectionTitle}>רשימת מטלות</Text>
         {taskList.map(task => (
-          <View key={task.task_id} style={styles.transactionRow}>
-            <View style={{ flex: 1 }}>
-              <Text>{task.name}</Text>
-              <Text style={{ color: '#555' }}>{task.description}</Text>
-              <Text>{task.payment_amount} ₪</Text>
+          <View key={task.task_id} style={styles.taskRow}>
+            <View style={styles.taskDetailsContainer}>
+              <Text style={styles.transactionKidName}>₪{task.payment_amount} - {task.name}</Text>
+              <Text style={styles.taskDescription}>{task.description}</Text>
             </View>
             <TouchableOpacity onPress={() => deleteTask(task.task_id)}>
               <Text style={{ color: 'red' }}>🗑️</Text>
             </TouchableOpacity>
           </View>
         ))}
+
       </View>
       <TouchableOpacity onPress={() => setShowTaskModal(true)} style={{ marginTop: 20, backgroundColor: '#3F51B5', padding: 12, borderRadius: 10 }}>
         <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>+ הוסף מטלה</Text>
