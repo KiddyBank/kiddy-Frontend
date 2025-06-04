@@ -92,7 +92,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 15,
     marginVertical: 10,
-    height: 130, // גובה קבוע
   },
 
   tasksScrollView: {
@@ -101,16 +100,21 @@ const styles = StyleSheet.create({
   },
 
   taskItem: {
-    width: 140,
-    height: 100,
-    backgroundColor: '#E8F5E9',
-    borderRadius: 10,
-    padding: 10,
+    width: 160,
+    height: 120,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-    elevation: 3,
+    justifyContent: 'space-between',
+    marginRight: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
+
 
   taskText: {
     fontSize: 14,
