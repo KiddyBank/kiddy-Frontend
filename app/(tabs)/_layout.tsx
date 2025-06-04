@@ -38,8 +38,20 @@ function TabScreens() {
         options={{
           href: role === AccountType.CHILD ? "/strategy-map" : null,
           title: 'מפת התקדמות',
+
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
         }}
+      />
+      <Tabs.Screen
+        name="challenges"
+        options={{
+          title: 'אתגרים',
+          href: role === AccountType.CHILD ? "/challenges" : null,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="trophy" color={color} />
+          ),
+        }}
+
       />
       <Tabs.Screen
         name="savings"
@@ -96,6 +108,7 @@ function TabScreens() {
         }}
       />
     </Tabs>
+
   );
 }
 

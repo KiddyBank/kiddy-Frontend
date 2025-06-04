@@ -1,8 +1,9 @@
-import { Level, LevelStatus } from '@/app/types/level';
-import { FontAwesome5 } from '@expo/vector-icons';
 import React from 'react';
 import { Dimensions, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { Level, LevelStatus } from '@/app/types/level';
 import { svgPathProperties } from 'svg-path-properties';
 
 
@@ -150,19 +151,6 @@ export const LevelMap: React.FC<Props> = ({ levels, onLevelPress }) => {
 
 
                             const color = LEVEL_COLORS[startLevel.status];
-                            if (color === LEVEL_COLORS[LevelStatus.Locked]) {
-                                return (
-                                    <Path
-                                        key={`path-${startLevel.id}-${endLevel.id}`}
-                                        d={segmentPath}
-                                        stroke={LEVEL_COLORS[LevelStatus.Locked]}
-                                        strokeWidth={8}
-                                        strokeLinecap="round"
-                                        fill="none"
-
-                                    />
-                                );
-                            }
 
                             return (
                                 <Path

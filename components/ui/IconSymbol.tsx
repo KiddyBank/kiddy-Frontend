@@ -18,7 +18,10 @@ const MAPPING = {
   'creditcard.fill': 'payment',
   'gearshape.fill': 'settings',
   'exit-to-app': 'logout',
-  'map.fill': 'map'
+  'map.fill': 'map',
+  'trophy': 'emoji-events'
+
+
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
