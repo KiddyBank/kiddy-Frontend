@@ -23,6 +23,7 @@ type PaymentRequest = {
   transaction_id: string;
   description: string;
   amount: number;
+  type: string;
   status: 'PENDING_PARENT_APPROVAL';
   child_balance: {
     child_user: {
@@ -264,6 +265,8 @@ export default function ParentScreen() {
     }
   };
 
+  
+
   return (
       <ScrollView
         contentContainerStyle={styles.container}
@@ -322,9 +325,27 @@ export default function ParentScreen() {
           <View key={item.transaction_id} style={styles.transactionRow}>
 
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text style={styles.titleText}>{item.child_balance?.child_user?.username} רוצה לחייב {item.amount}₪ </Text>
-              <Text style={styles.descriptionText}>הודעת הבקשה: {item.description}</Text>
+              {item.type === 'parent_deposit' ? (
+                <>
+                  <Text style={styles.titleText}>
+                    {item.child_balance?.child_user?.username} מבקש תשלום של {item.amount}₪
+                  </Text>
+                  <Text style={styles.descriptionText}>
+                    עבור ביצוע מטלת: {item.description}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.titleText}>
+                    {item.child_balance?.child_user?.username} רוצה לחייב {item.amount}₪
+                  </Text>
+                  <Text style={styles.descriptionText}>
+                    הודעת הבקשה: {item.description}
+                  </Text>
+                </>
+              )}
             </View>
+
 
             <View style={styles.toggleButtonsContainer}>
               <TouchableOpacity
