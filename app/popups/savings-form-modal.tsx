@@ -8,7 +8,10 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
+import axios from 'axios';
 import { styles } from '../styles/savings-form-modal.styles';
+import Constants from 'expo-constants';
+import { useAuth } from '../context/auth-context';
 
 type Props = {
   visible: boolean;
@@ -29,43 +32,60 @@ const SavingsFormPopup: React.FC<Props> = ({
   availableBalance,
 }) => {
   const [name, setName] = React.useState('');
-  const [category, setCategory] = React.useState('');
+  const [category, setCategory] = React.useState('חיסכון כללי');
   const [targetAmount, setTargetAmount] = React.useState('');
   const [initialAmount, setInitialAmount] = React.useState('');
   const [error, setError] = React.useState('');
   const isDisabled =
-  !name ||
-  !targetAmount ||
-  +initialAmount > availableBalance ||
-  +initialAmount > +targetAmount;
+    !name ||
+    !targetAmount ||
+    +initialAmount > availableBalance ||
+    +initialAmount > +targetAmount;
+  const { token, sub } = useAuth();
+  const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
+  const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const initial = +initialAmount;
     const target = +targetAmount;
+    console.log('submit pressed');
 
-    if (!name || !category || !targetAmount) return;
+    if (!name || !category || !targetAmount) {
+      setError('בעיה במילוי הטופס');
+      return;}
 
     if (initial > availableBalance) {
       setError('אין לך מספיק יתרה 😅');
       return;
     }
 
-    onSubmit({
-      name,
-      category,
-      targetAmount: target,
-      initialAmount: initial,
-    });
+    try {
+      await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/savings-goals`, {
+        name,
+        category,
+        targetAmount: target,
+        initialAmount: initial,
+      }, {
+        
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
 
-    setName('');
-    setCategory('');
-    setTargetAmount('');
-    setInitialAmount('');
-    setError('');
-    onClose();
+      setName('');
+      setCategory('');
+      setTargetAmount('');
+      setInitialAmount('');
+      setError('');
+      onClose(); 
+    } catch (error: any) {
+      setError('אירעה שגיאה בעת שמירת החיסכון 😞');
+      console.error('שגיאת יצירת יעד:', error?.response?.data || error.message);
+    }
   };
+
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -92,9 +112,13 @@ const SavingsFormPopup: React.FC<Props> = ({
               onChangeText={setTargetAmount}
             />
 
-            <Text style={styles.label}>
-              רוצה לשים משהו כבר עכשיו?  (יש לך {availableBalance.toLocaleString('he-IL')}₪)
-            </Text>
+            {availableBalance != null ? (
+              <Text style={styles.label}>
+                רוצה לשים משהו כבר עכשיו? (יש לך {availableBalance.toLocaleString('he-IL')}₪)
+              </Text>
+            ) : (
+              <Text style={styles.label}>טוען יתרה...</Text>
+            )}
             <TextInput
               style={styles.input}
               keyboardType="numeric"
