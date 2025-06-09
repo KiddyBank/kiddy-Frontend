@@ -15,11 +15,11 @@ export const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginTop: 24,
     marginBottom: 12,
+    alignSelf: 'flex-end',
+    writingDirection: 'rtl',
   },
 
   emptyText: {
@@ -145,19 +145,11 @@ goalProgress: {
   justifyContent: 'center',
 },
 
-graphTitle: {
-  fontSize: 20,
-  fontWeight: 'bold',
-  color: '#3F51B5',
-  marginBottom: 12,
-  alignSelf: 'flex-end',
-  writingDirection: 'rtl',
-},
 
 customLegendContainer: {
   marginTop: 16,
   width: '100%',
-  alignItems: 'flex-end', // ימין לשמאל
+  alignItems: 'flex-end', 
   gap: 8,
 },
 
@@ -220,6 +212,38 @@ depositValue: {
   fontSize: 14,
   color: '#333',
   flexShrink: 1,
+},
+
+// תוספות ל-savings-screen.styles.ts
+
+encouragementContainer: {
+  backgroundColor: '#E5F9F2',
+  borderRadius: 16,
+  padding: 16,
+  marginVertical: 20,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+savingsEncouragement: {
+  fontSize: 16,
+  color: '#1B4D3E',
+  textAlign: 'center',
+  marginBottom: 12,
+  fontWeight: '500',
+},
+
+encourageButton: {
+  backgroundColor: '#00C897',
+  paddingVertical: 10,
+  paddingHorizontal: 24,
+  borderRadius: 20,
+},
+
+encourageButtonText: {
+  color: 'white',
+  fontSize: 16,
+  fontWeight: 'bold',
 },
 
 

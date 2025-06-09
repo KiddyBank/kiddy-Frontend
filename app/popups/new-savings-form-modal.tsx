@@ -146,7 +146,6 @@ const SavingsFormPopup: React.FC<Props> = ({
               <Text style={styles.submitButtonText}>יאללה, נתחיל! 🚀</Text>
             </TouchableOpacity>
 
-
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
               <Text style={styles.cancelButtonText}>ביטול</Text>
             </TouchableOpacity>

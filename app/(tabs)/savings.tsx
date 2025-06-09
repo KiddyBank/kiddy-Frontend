@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  SafeAreaView,
+  RefreshControl,
+} from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
 import { styles } from '../styles/savings-screen.styles';
-import SavingsFormPopup from '../popups/savings-form-modal';
+import SavingsFormPopup from '../popups/new-savings-form-modal';
+import AddToSavingsFormModal from '../popups/add-to-savings-form-modal';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '../context/auth-context';
-import { RefreshControl } from 'react-native';
-
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -29,8 +36,9 @@ type Goal = {
   status: string;
   created_at: string;
   updated_at: string;
-  deposits?: Deposit[]; 
+  deposits?: Deposit[];
 };
+
 type Transaction = {
   transaction_id: string;
   status: string;
@@ -40,18 +48,19 @@ type Transaction = {
   created_at: string;
 };
 
-  const SavingsScreen: React.FC = () => {
+const SavingsScreen: React.FC = () => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [showManualDepositPopup, setShowManualDepositPopup] = useState(false);
   const [balance, setBalance] = useState(0);
+  const [balanceId, setBalanceId] = useState<number | null>(null);
   const [goal, setGoal] = useState<Goal | null>(null);
+  const [goalTransactions, setGoalTransactions] = useState<Transaction[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { sub } = useAuth();
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
-  const [goalTransactions, setGoalTransactions] = useState<Transaction[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
 
-
- const onRefresh = async () => {
+  const onRefresh = async () => {
     setRefreshing(true);
     await fetchBalance();
 
@@ -66,25 +75,26 @@ type Transaction = {
       await fetchGoalTransactions(refreshedGoal.id);
     } else {
       setGoal(null);
-      setGoalTransactions([]); 
+      setGoalTransactions([]);
     }
 
     setRefreshing(false);
   };
 
-
-
-  const fetchBalance = async () => {
+ const fetchBalance = async () => {
     try {
       const token = await SecureStore.getItemAsync('token');
       const res = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/balance/${sub}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setBalance(res.data.balance);
+      setBalanceId(res.data.balance_id); 
     } catch (err) {
       console.log('שגיאה בשליפת יתרה', err);
     }
   };
+
 
   const fetchGoal = async () => {
     try {
@@ -133,16 +143,15 @@ type Transaction = {
   };
 
   useEffect(() => {
-  fetchBalance();
-  fetchGoal();
-}, []);
+    fetchBalance();
+    fetchGoal();
+  }, []);
 
-useEffect(() => {
-  if (goal?.id) {
-    fetchGoalTransactions(goal.id);
-  }
-}, [goal]);
-
+  useEffect(() => {
+    if (goal?.id) {
+      fetchGoalTransactions(goal.id);
+    }
+  }, [goal]);
 
   if (!goal) {
     return (
@@ -173,32 +182,31 @@ useEffect(() => {
   }
 
   const { current_amount, target_amount } = goal;
+
   const pieData = [
-  {
-    name: 'שקלים בחיסכון',
-    amount: current_amount,
-    color: '#4CAF50',
-    legendFontColor: '#333',
-    legendFontSize: 16,
-  },
-  {
-    name: 'שקלים נדרש עוד לחסוך',
-    amount: Math.max(target_amount - current_amount, 0),
-    color: '#e1ebf7',
-    legendFontColor: '#333',
-    legendFontSize: 16,
-  },
-];
+    {
+      name: 'שקלים בחיסכון',
+      amount: Number(goal?.current_amount ?? 0),
+      color: '#4CAF50',
+      legendFontColor: '#333',
+      legendFontSize: 16,
+    },
+    {
+      name: 'שקלים נדרש עוד לחסוך',
+      amount: Math.max(Number(goal?.target_amount ?? 0) - Number(goal?.current_amount ?? 0), 0),
+      color: '#e1ebf7',
+      legendFontColor: '#333',
+      legendFontSize: 16,
+    },
+  ];
 
 
-return (
-
-  <SafeAreaView style={styles.container}>
+  return (
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
         <Text style={styles.goalName}>חיסכון ל{goal.name}</Text>
-        <Text style={styles.goalProgress}>היעד- {goal.target_amount.toLocaleString()}₪
-        </Text>
+        <Text style={styles.goalProgress}>היעד- {Number(goal?.target_amount ?? 0).toLocaleString()}₪</Text>
       </View>
 
       <ScrollView
@@ -208,93 +216,115 @@ return (
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-      {/* גרף חיסכון */}
-      <View style={styles.graphCard}>
-        <Text style={styles.graphTitle}>התקדמות בחיסכון</Text>
-
-        <View style={styles.graphWrapper}>
-          <PieChart
-            data={pieData}
-            width={220} 
-            height={220}
-            chartConfig={{
-              backgroundColor: '#fff',
-              backgroundGradientFrom: '#fff',
-              backgroundGradientTo: '#fff',
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              labelColor: () => '#333',
-            }}
-            accessor="amount"
-            backgroundColor="transparent"
-            paddingLeft="50"
-            hasLegend={false}
-          />
-        </View>
-
-        {/* מקרא */}
-        <View style={styles.customLegendContainer}>
-          <View style={styles.legendRow}>
-            <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
-            <Text style={styles.legendLabel}>
-              {current_amount.toLocaleString()}₪ נשמר בחיסכון
-            </Text>
-          </View>
-          <View style={styles.legendRow}>
-            <View style={[styles.legendDot, { backgroundColor: '#e1ebf7' }]} />
-            <Text style={styles.legendLabel}>
-              {Math.max(target_amount - current_amount, 0).toLocaleString()}₪ נותר לחסוך
-            </Text>
-          </View>
-        </View>
-      </View>
-
-     {/* הפקדות */}
-    <Text style={styles.sectionTitle}>הפקדות</Text>
-
-      {goalTransactions.length > 0 ? (
-        goalTransactions
-          .filter(tx => tx.type === 'goal_deposit') // סינון הפקדות בלבד
-          .map((tx, index) => (
-            <View key={index} style={styles.depositCard}>
-              <View style={styles.depositRow}>
-                <Text style={styles.depositIcon}>💰</Text>
-                <Text style={styles.depositLabel}>סכום:</Text>
-                <Text style={styles.depositValue}>{tx.amount.toLocaleString()}₪</Text>
-              </View>
-              <View style={styles.depositRow}>
-                <Text style={styles.depositIcon}>📅</Text>
-                <Text style={styles.depositLabel}>תאריך:</Text>
-                <Text style={styles.depositValue}>
-                  {new Date(tx.created_at).toLocaleDateString()} בשעה{' '}
-                  {new Date(tx.created_at).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  })}
-                </Text>
-              </View>
-              {tx.description && (
-                <View style={styles.depositRow}>
-                  <Text style={styles.depositIcon}>📝</Text>
-                  <Text style={styles.depositLabel}>הערה:</Text>
-                  <Text style={styles.depositValue}>{tx.description}</Text>
-                </View>
-              )}
+        {/* בלוק עידוד */}
+        {balance >= 10 && balanceId && (
+          <View style={styles.encouragementContainer}>
+            <View style={styles.savingsEncouragement}>
+              <Text>נראה שיש לך {balance.toLocaleString()}₪ פנויים ביתרה!</Text>
+              <Text>בוא נכניס אותם לחיסכון כדי להגיע ליעד 🤩</Text>
             </View>
-          ))
-      ) : (
-        <View style={styles.emptySection}>
-          <Text style={styles.emptyText}>עוד לא בוצעה הפקדה</Text>
+            <TouchableOpacity
+              style={styles.encourageButton}
+              onPress={() => setShowManualDepositPopup(true)}
+            >
+              <Text style={styles.encourageButtonText}>הפקד לחיסכון</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <Text style={styles.sectionTitle}>התקדמות בחיסכון</Text>
+        <View style={styles.graphCard}>
+          <View style={styles.graphWrapper}>
+            <PieChart
+              data={pieData}
+              width={220}
+              height={220}
+              chartConfig={{
+                backgroundColor: '#fff',
+                backgroundGradientFrom: '#fff',
+                backgroundGradientTo: '#fff',
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                labelColor: () => '#333',
+              }}
+              accessor="amount"
+              backgroundColor="transparent"
+              paddingLeft="50"
+              hasLegend={false}
+            />
+          </View>
+
+          <View style={styles.customLegendContainer}>
+            <View style={styles.legendRow}>
+              <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
+              <Text style={styles.legendLabel}>
+                {Number(goal?.current_amount ?? 0).toLocaleString()}₪ נשמר בחיסכון
+              </Text>
+            </View>
+            <View style={styles.legendRow}>
+              <View style={[styles.legendDot, { backgroundColor: '#e1ebf7' }]} />
+              <Text style={styles.legendLabel}>
+                {Math.max(Number(goal?.target_amount ?? 0) - Number(goal?.current_amount ?? 0), 0).toLocaleString()}₪ נותר לחסוך
+              </Text>
+            </View>
+          </View>
         </View>
+
+        {/* הפקדות */}
+        <Text style={styles.sectionTitle}>הפקדות</Text>
+        {goalTransactions.length > 0 ? (
+          goalTransactions
+            .filter(tx => tx.type === 'goal_deposit')
+            .map((tx, index) => (
+              <View key={index} style={styles.depositCard}>
+                <View style={styles.depositRow}>
+                  <Text style={styles.depositIcon}>💰</Text>
+                  <Text style={styles.depositLabel}>סכום:</Text>
+                  <Text style={styles.depositValue}>{Number(tx.amount ?? 0).toLocaleString()}₪</Text>                
+                </View>
+                <View style={styles.depositRow}>
+                  <Text style={styles.depositIcon}>📅</Text>
+                  <Text style={styles.depositLabel}>תאריך:</Text>
+                  <Text style={styles.depositValue}>
+                    {new Date(tx.created_at).toLocaleDateString()} בשעה{' '}
+                    {new Date(tx.created_at).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })}
+                  </Text>
+                </View>
+                {tx.description && (
+                  <View style={styles.depositRow}>
+                    <Text style={styles.depositIcon}>📝</Text>
+                    <Text style={styles.depositLabel}>הערה:</Text>
+                    <Text style={styles.depositValue}>{tx.description}</Text>
+                  </View>
+                )}
+              </View>
+            ))
+        ) : (
+          <View style={styles.emptySection}>
+            <Text style={styles.emptyText}>עוד לא בוצעה הפקדה</Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {showManualDepositPopup && balanceId !== null && (
+        <AddToSavingsFormModal
+          visible={showManualDepositPopup}
+          onClose={() => setShowManualDepositPopup(false)}
+          balanceId={balanceId}
+          goalId={goal.id}
+          availableBalance={balance}
+          remainingToGoal={goal.target_amount - goal.current_amount}
+          onSuccess={onRefresh}
+        />
+
       )}
 
-
-    </ScrollView>
-  </SafeAreaView>
-  
-);
-
+    </SafeAreaView>
+  );
 };
 
 export default SavingsScreen;
