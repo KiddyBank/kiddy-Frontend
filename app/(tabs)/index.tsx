@@ -18,6 +18,10 @@ import PaymentRequestModal from '../popups/payment-request-modal';
 import styles from '../styles/main-kid.styles';
 import { useAuth } from '../context/auth-context';
 import * as SecureStore from 'expo-secure-store';
+import AddToSavingsFormModal from '../popups/add-to-savings-form-modal';
+import { useNavigation } from '@react-navigation/native';
+
+
 
 type Transaction = {
   transaction_id: string;
@@ -50,27 +54,45 @@ const MainKidScreen = () => {
   const [requestsError, setRequestsError] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const route = useRoute();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const navigation = useNavigation();
+
+
+
+  const [showManualDepositPopup, setShowManualDepositPopup] = useState(false);
+  const [goal, setGoal] = useState<any>(null); 
+  const [balanceId, setBalanceId] = useState<number | null>(null); 
+
 
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
-  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const fetchAllData = async () => {
     try {
-      const [balanceRes, transactionsRes, tasksRes, requestsRes] = await Promise.all([
+      const [balanceRes, transactionsRes, tasksRes, requestsRes, goalRes] = await Promise.all([
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/balance/${sub}`),
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/transactions/${sub}?transaction_status=COMPLETED`),
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks/by-child`, {
           headers: { Authorization: `Bearer ${await SecureStore.getItemAsync('token')}` },
         }),
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/transactions/${sub}?transaction_status=APPROVED_BY_PARENT`),
+        axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/savings-goals/by-user`, {
+          headers: { Authorization: `Bearer ${await SecureStore.getItemAsync('token')}` },
+        }),
       ]);
 
       setBalance(balanceRes.data.balance);
+      setBalanceId(balanceRes.data.balance_id);
       setTransactions(transactionsRes.data);
       setTasks(tasksRes.data);
       setRequests(requestsRes.data);
+
+      if (goalRes.data.length > 0) {
+        setGoal(goalRes.data[0]);
+      } else {
+        setGoal(null);
+      }
 
       setError('');
       setTransactionsError('');
@@ -85,6 +107,7 @@ const MainKidScreen = () => {
       }
     }
   };
+
 
   useFocusEffect(
     useCallback(() => {
@@ -155,6 +178,22 @@ const MainKidScreen = () => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      {/* בלוק עידוד */}
+      {balance >= 10 && balanceId && (
+        <View style={styles.encouragementContainer}>
+          <View style={styles.savingsEncouragement}>
+            <Text>נראה שיש לך {balance.toLocaleString()}₪ פנויים ביתרה!</Text>
+            <Text>בוא נכניס אותם לחיסכון כדי להגיע ליעד 🤩</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.encourageButton}
+            onPress={() => setShowManualDepositPopup(true)}
+          >
+            <Text style={styles.encourageButtonText}>הפקד לחיסכון</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
         {/* תנועות */}
         <View style={styles.transactionsContainer}>
           <Text style={styles.sectionTitle}>תנועות אחרונות</Text>
@@ -243,6 +282,59 @@ const MainKidScreen = () => {
             </View>
           )}
         </View>
+
+        {/* חיסכון */}
+        <View style={styles.savingsSection}>
+          <Text style={styles.sectionTitle}>החיסכון שלי</Text>
+
+          {goal ? (
+            <>
+              <TouchableOpacity
+                style={styles.savingsCard}
+                onPress={() => navigation.navigate('savings' as never)}
+              >
+                <Ionicons name="wallet-outline" size={30} color="#3F51B5" style={{ marginLeft: 10 }} />
+                <View style={styles.savingsTextContainer}>
+                  <Text style={styles.savingsTitle}>חיסכון ל{goal.name}</Text>
+
+                  <View style={styles.progressBarContainer}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${Math.min(
+                            (goal.current_amount / goal.target_amount) * 100,
+                            100
+                          )}%`,
+                        },
+                      ]}
+                    />
+                  </View>
+
+                  <Text style={styles.progressPercent}>
+                    {Math.round((goal.current_amount / goal.target_amount) * 100)}% הושג
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={() => setShowManualDepositPopup(true)}
+              >
+                <Text style={styles.saveButtonText}>הפקד לחיסכון</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity
+              style={styles.noGoalButton}
+              onPress={() => navigation.navigate('savings' as never)}
+            >
+              <Text style={styles.noGoalButtonText}>+ הגדר חיסכון חדש</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+
       </ScrollView>
 
       <View style={styles.payButtonBackground}>
@@ -263,6 +355,22 @@ const MainKidScreen = () => {
         }}
         transactionId={selectedTransactionId}
       />
+
+      {showManualDepositPopup && balanceId && goal?.id && (
+      <AddToSavingsFormModal
+        visible={showManualDepositPopup}
+        onClose={() => setShowManualDepositPopup(false)}
+        balanceId={balanceId}
+        goalId={goal.id}
+        availableBalance={balance}
+        remainingToGoal={goal.target_amount - goal.current_amount}
+        onSuccess={() => {
+          setShowManualDepositPopup(false);
+          fetchAllData(); 
+        }}
+      />
+    )}
+
     </SafeAreaView>
   );
 };

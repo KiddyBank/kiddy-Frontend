@@ -214,8 +214,6 @@ depositValue: {
   flexShrink: 1,
 },
 
-// תוספות ל-savings-screen.styles.ts
-
 encouragementContainer: {
   backgroundColor: '#E5F9F2',
   borderRadius: 16,

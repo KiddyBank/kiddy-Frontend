@@ -245,6 +245,111 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+
+  savingsSection: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    marginVertical: 10,
+  },
+
+  savingsCard: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#E8EAF6',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+
+  savingsTextContainer: {
+    flex: 1,
+  },
+
+  savingsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3F51B5',
+    textAlign: 'right',
+  },
+
+  saveButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  noGoalButton: {
+  backgroundColor: '#FFC107',
+  paddingVertical: 12,
+  borderRadius: 20,
+  alignItems: 'center',
+},
+
+noGoalButtonText: {
+  color: '#333',
+  fontWeight: 'bold',
+  fontSize: 16,
+},
+
+progressBarContainer: {
+  height: 10,
+  backgroundColor: '#E0E0E0',
+  borderRadius: 5,
+  overflow: 'hidden',
+  marginTop: 8,
+},
+
+progressBarFill: {
+  height: '100%',
+  backgroundColor: '#4CAF50',
+  borderRadius: 5,
+},
+
+progressPercent: {
+  marginTop: 4,
+  fontSize: 12,
+  color: '#333',
+  textAlign: 'right',
+},
+
+savingsEncouragement: {
+  fontSize: 16,
+  color: '#1B4D3E',
+  textAlign: 'center',
+  marginBottom: 12,
+  fontWeight: '500',
+},
+
+encourageButton: {
+  backgroundColor: '#00C897',
+  paddingVertical: 10,
+  paddingHorizontal: 24,
+  borderRadius: 20,
+},
+
+encourageButtonText: {
+  color: 'white',
+  fontSize: 16,
+  fontWeight: 'bold',
+},
+
+encouragementContainer: {
+  backgroundColor: '#E5F9F2',
+  borderRadius: 16,
+  padding: 16,
+  marginVertical: 20,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
   
 });
 
