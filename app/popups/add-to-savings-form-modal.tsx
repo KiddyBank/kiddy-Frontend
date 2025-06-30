@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import LottieView from 'lottie-react-native';
 import { styles } from './../styles/add-to-savings-form-modal.styles';
 import Constants from 'expo-constants';
 import axios from 'axios';
+
 
 type Props = {
   visible: boolean;
@@ -32,7 +32,6 @@ const AddToSavingsFormModal: React.FC<Props> = ({
   onSuccess,
 }) => {
   const [amount, setAmount] = useState('');
-  const [showConfetti, setShowConfetti] = useState(false);
   const [error, setError] = useState('');
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
@@ -40,6 +39,9 @@ const AddToSavingsFormModal: React.FC<Props> = ({
   const parsedAmount = parseInt(amount);
   const validAvailable = Math.floor(availableBalance || 0);
   const validRemaining = Math.floor(remainingToGoal || 0);
+  const [isLoading, setIsLoading] = useState(false);
+
+
 
   const isInvalid =
     isNaN(parsedAmount) ||
@@ -54,6 +56,7 @@ const AddToSavingsFormModal: React.FC<Props> = ({
     }
 
     try {
+      setIsLoading(true);
       await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/child-balance/transactions/deposit-to-goal`, {
         balanceId,
         goalId,
@@ -61,16 +64,14 @@ const AddToSavingsFormModal: React.FC<Props> = ({
         description: 'הפקדה ידנית לחיסכון',
       });
 
-      setShowConfetti(true);
-      setTimeout(() => {
-        setShowConfetti(true);
-        onSuccess();
-        onClose();
-      }, 2000);
+      onSuccess();
+      onClose();
+
     } catch (error) {
       console.error('שגיאה בהפקדה לחיסכון:', error);
       alert('משהו השתבש 😢');
     }
+     setIsLoading(false);
   };
 
   const handleChange = (text: string) => {
@@ -123,14 +124,7 @@ const AddToSavingsFormModal: React.FC<Props> = ({
           </TouchableOpacity>
         </View>
 
-        {showConfetti && (
-          <LottieView
-            source={require('../../assets/animations/confetti.json')}
-            autoPlay
-            loop={false}
-            style={styles.confetti}
-          />
-        )}
+  
       </View>
     </Modal>
   );

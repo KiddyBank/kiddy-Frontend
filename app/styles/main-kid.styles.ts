@@ -349,6 +349,16 @@ encouragementContainer: {
   alignItems: 'center',
   justifyContent: 'center',
 },
+greetingText: {
+  alignSelf: 'flex-start',
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: 'white',
+  paddingHorizontal: 20,
+  paddingTop: 10,
+  textAlign: 'right',
+  width: '100%',
+},
 
   
 });

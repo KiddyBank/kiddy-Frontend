@@ -17,6 +17,8 @@ import axios from 'axios';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '../context/auth-context';
+import ConfettiOverlay from '../../components/ConfettiOverlay';
+
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -57,6 +59,10 @@ const SavingsScreen: React.FC = () => {
   const [goalTransactions, setGoalTransactions] = useState<Transaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { sub } = useAuth();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiMessage, setConfettiMessage] = useState('');
+
+  
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
@@ -135,12 +141,18 @@ const SavingsScreen: React.FC = () => {
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      await fetchGoal();
+
       setIsPopupVisible(false);
+      setTimeout(() => {
+        setConfettiMessage('איזה כיף! יש לך מטרה חדשה לחיסכון 🎯');
+        setShowConfetti(true);
+        onRefresh(); 
+      }, 400);
     } catch (err) {
       console.log('שגיאה ביצירת יעד חדש', err);
     }
   };
+
 
   useEffect(() => {
     fetchBalance();
@@ -180,8 +192,6 @@ const SavingsScreen: React.FC = () => {
       </ScrollView>
     );
   }
-
-  const { current_amount, target_amount } = goal;
 
   const pieData = [
     {
@@ -318,10 +328,22 @@ const SavingsScreen: React.FC = () => {
           goalId={goal.id}
           availableBalance={balance}
           remainingToGoal={goal.target_amount - goal.current_amount}
-          onSuccess={onRefresh}
+          onSuccess={() => {
+            setTimeout(() => {
+              setConfettiMessage('כל הכבוד! החיסכון מתקדם 🎯');
+              setShowConfetti(true);
+              onRefresh();
+            }, 400); 
+          }}
         />
 
       )}
+
+      <ConfettiOverlay
+        visible={showConfetti}
+        onFinish={() => setShowConfetti(false)}
+        message={confettiMessage}
+      />
 
     </SafeAreaView>
   );

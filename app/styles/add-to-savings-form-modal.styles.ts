@@ -69,14 +69,34 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  confetti: {
+
+ confetti: {
     position: 'absolute',
-    top: -30,
+    top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 2,
+    zIndex: 999,
+    pointerEvents: 'none',
   },
+  successMessageContainer: {
+    position: 'absolute',
+    top: '40%',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  successMessageText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#4BB543',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    elevation: 4,
+  },
+
   errorText: {
   color: '#E53935',
   fontSize: 14,
