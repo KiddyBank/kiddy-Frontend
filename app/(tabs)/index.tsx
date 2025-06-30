@@ -7,6 +7,7 @@ import {
   Animated,
   Easing,
   Image,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   Text,
@@ -20,8 +21,7 @@ import { useAuth } from '../context/auth-context';
 import * as SecureStore from 'expo-secure-store';
 import AddToSavingsFormModal from '../popups/add-to-savings-form-modal';
 import { useNavigation } from '@react-navigation/native';
-
-
+import ConfettiOverlay from '../../components/ConfettiOverlay';
 
 type Transaction = {
   transaction_id: string;
@@ -46,6 +46,7 @@ const MainKidScreen = () => {
   const [selectedTransactionId, setSelectedTransactionId] = useState<string>();
   const [disabledTasks, setDisabledTasks] = useState<Record<string, boolean>>({});
   const { sub } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
 
   const [error, setError] = useState('');
   const [transactionsError, setTransactionsError] = useState('');
@@ -57,11 +58,14 @@ const MainKidScreen = () => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const navigation = useNavigation();
 
-
-
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiMessage, setConfettiMessage] = useState('');
+  
   const [showManualDepositPopup, setShowManualDepositPopup] = useState(false);
   const [goal, setGoal] = useState<any>(null); 
   const [balanceId, setBalanceId] = useState<number | null>(null); 
+  const [childName, setChildName] = useState('');
+
 
 
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
@@ -70,7 +74,7 @@ const MainKidScreen = () => {
 
   const fetchAllData = async () => {
     try {
-      const [balanceRes, transactionsRes, tasksRes, requestsRes, goalRes] = await Promise.all([
+      const [balanceRes, transactionsRes, tasksRes, requestsRes, goalRes, userRes] = await Promise.all([
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/balance/${sub}`),
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/transactions/${sub}?transaction_status=COMPLETED`),
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks/by-child`, {
@@ -80,8 +84,10 @@ const MainKidScreen = () => {
         axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/savings-goals/by-user`, {
           headers: { Authorization: `Bearer ${await SecureStore.getItemAsync('token')}` },
         }),
+        axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/${sub}`),
       ]);
 
+      setChildName(userRes.data.username);
       setBalance(balanceRes.data.balance);
       setBalanceId(balanceRes.data.balance_id);
       setTransactions(transactionsRes.data);
@@ -98,6 +104,24 @@ const MainKidScreen = () => {
       setTransactionsError('');
       setTasksError('');
       setRequestsError('');
+
+      // ✅ בדיקת דמי כיס חדשים והצגת קונפטי
+      const lastCheck = await SecureStore.getItemAsync(`last_pocket_money_check_${sub}`);
+      const lastDate = lastCheck ? new Date(lastCheck) : new Date(0);
+
+      const newPocketMoneyTx = transactionsRes.data.find(
+        (tx: Transaction) =>
+          tx.type === 'parent_deposit' &&
+          tx.description === 'דמי כיס' &&
+          new Date(tx.created_at) > lastDate
+      );
+
+      if (newPocketMoneyTx) {
+        setConfettiMessage('יש! קיבלת דמי כיס חדשים 🎉');
+        setShowConfetti(true);
+        await SecureStore.setItemAsync(`last_pocket_money_check_${sub}`, new Date().toISOString());
+      }
+
     } catch (error) {
       if (error instanceof Error) {
         console.error('❌ !שגיאה כללית:', error.stack);
@@ -106,6 +130,12 @@ const MainKidScreen = () => {
         setTasksError('שגיאה בשליפת משימות 😢');
       }
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchAllData();
+    setRefreshing(false);
   };
 
 
@@ -122,9 +152,18 @@ const MainKidScreen = () => {
   }, [route.params]);
 
   const getTransactionColor = (type: string) => {
-    const positiveTypes = ['parent_deposit', 'goal_deposit', 'store_refund'];
-    return positiveTypes.includes(type.toLowerCase()) ? 'green' : 'red';
+    switch (type.toLowerCase()) {
+      case 'parent_deposit':
+      case 'store_refund':
+        return 'green'; // הפקדה ליתרה
+      case 'goal_deposit':
+        return 'purple'; // הפקדה לחיסכון
+      case 'child_purchase':
+      default:
+        return 'red'; // חיוב
+    }
   };
+
 
   const getRequestColor = (status: string) => {
     const positiveTypes = ['APPROVED_BY_PARENT'];
@@ -171,14 +210,22 @@ const MainKidScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <Text style={styles.greetingText}>היי, {childName}</Text>
         <Image source={{ uri: 'https://via.placeholder.com/80' }} style={styles.profileImage} />
         <Text style={styles.balanceText}>{balance.toLocaleString()} ₪</Text>
-        <Text style={styles.balanceLabel}>היתרה שלי</Text>
+        <Text style={styles.balanceLabel}>היתרה שלך</Text>
         {error !== '' && <Text style={styles.errorText}>{error}</Text>}
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-      {/* בלוק עידוד */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+
+      {/* בלוק עידוד -- להוסיף תנאי שקיים חיסכון
       {balance >= 10 && balanceId && (
         <View style={styles.encouragementContainer}>
           <View style={styles.savingsEncouragement}>
@@ -192,7 +239,7 @@ const MainKidScreen = () => {
             <Text style={styles.encourageButtonText}>הפקד לחיסכון</Text>
           </TouchableOpacity>
         </View>
-      )}
+      )}*/}
 
         {/* תנועות */}
         <View style={styles.transactionsContainer}>
@@ -354,6 +401,15 @@ const MainKidScreen = () => {
           fetchAllData();
         }}
         transactionId={selectedTransactionId}
+        transactionAmount={
+          requests.find(r => r.transaction_id === selectedTransactionId)?.amount
+        }
+        onSuccess={(msg) => {
+          setTimeout(() => {
+          setConfettiMessage(msg);
+          setShowConfetti(true);
+           }, 1000); 
+        }}
       />
 
       {showManualDepositPopup && balanceId && goal?.id && (
@@ -365,11 +421,22 @@ const MainKidScreen = () => {
         availableBalance={balance}
         remainingToGoal={goal.target_amount - goal.current_amount}
         onSuccess={() => {
-          setShowManualDepositPopup(false);
-          fetchAllData(); 
-        }}
+          setShowManualDepositPopup(false);    
+          setTimeout(() => {
+            setConfettiMessage('כל הכבוד! החיסכון מתקדם 🎯');
+            setShowConfetti(true);
+            fetchAllData();
+          }, 400);                   
+                }}
       />
     )}
+
+    <ConfettiOverlay
+      visible={showConfetti}
+      onFinish={() => setShowConfetti(false)}
+      message={confettiMessage}
+    />
+
 
     </SafeAreaView>
   );

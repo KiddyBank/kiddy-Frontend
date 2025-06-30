@@ -146,20 +146,36 @@ export default function ParentScreen() {
   };
 
 
-  const handlePaymentRequest = async (transactionId: string, action: 'approve' | 'reject') => {
+ const handlePaymentRequest = async (
+    transactionId: string,
+    type: string,
+    action: 'approve' | 'reject'
+  ) => {
     try {
-      await axios.post(`http://${LOCAL_IP}:3000/users/parents/${sub}/handle-payment-request`, {
-        transactionId,
+     const endpoint =
+      type === 'parent_deposit'
+        ? `http://${LOCAL_IP}:3000/child-balance/transactions/approve-deposit/${transactionId}`
+        : `http://${LOCAL_IP}:3000/child-balance/transactions/approve-store/${transactionId}`;
+
+
+      await axios.patch(endpoint, {
+        parentId: sub,
         action,
       });
-      setPaymentRequests((prev) => prev.filter((req) => req.transaction_id !== transactionId));
-      const message = action === 'approve' ? 'בקשה אושרה בהצלחה' : 'הבקשה נדחתה בהצלחה';
+
+      setPaymentRequests((prev) =>
+        prev.filter((req) => req.transaction_id !== transactionId)
+      );
+
+      const message =
+        action === 'approve' ? 'בקשה אושרה בהצלחה' : 'הבקשה נדחתה בהצלחה';
       alert(message);
     } catch (error: any) {
       console.error(`שגיאה בביצוע פעולה (${action})`, error?.response?.data || error.message);
       alert('שגיאה בטיפול בבקשה');
     }
   };
+
 
   //דמי כיס
   const openAllowanceModal = (kid: Child) => {
@@ -279,7 +295,7 @@ export default function ParentScreen() {
         <Text style={styles.header}>יתרות הילדים</Text>
       </View>
 
-      <View style={styles.kidsContainer}>
+      <View style={styles.kidsContainer}> 
         {children.map((kid, index) => (
           <View style={styles.kid} key={index}>
             <TouchableOpacity style={styles.allowanceBadge} onPress={() => openAllowanceModal(kid)}>
@@ -350,13 +366,13 @@ export default function ParentScreen() {
             <View style={styles.toggleButtonsContainer}>
               <TouchableOpacity
                 style={[styles.toggleButton, styles.approveButton]}
-                onPress={() => handlePaymentRequest(item.transaction_id, 'approve')}>
+                onPress={() => handlePaymentRequest(item.transaction_id, item.type, 'approve')}>
                 <Text style={styles.toggleButtonText}>✓</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.toggleButton, styles.rejectButton]}
-                onPress={() => handlePaymentRequest(item.transaction_id, 'reject')}>
+                onPress={() => handlePaymentRequest(item.transaction_id, item.type, 'reject')}>
                 <Text style={styles.toggleButtonText}>X</Text>
               </TouchableOpacity>
             </View>

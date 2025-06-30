@@ -47,14 +47,14 @@ const SavingsFormPopup: React.FC<Props> = ({
 
 
 
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
     const initial = +initialAmount;
     const target = +targetAmount;
-    console.log('submit pressed');
 
     if (!name || !category || !targetAmount) {
       setError('בעיה במילוי הטופס');
-      return;}
+      return;
+    }
 
     if (initial > availableBalance) {
       setError('אין לך מספיק יתרה 😅');
@@ -62,16 +62,11 @@ const SavingsFormPopup: React.FC<Props> = ({
     }
 
     try {
-      await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/savings-goals`, {
+      await onSubmit({
         name,
         category,
         targetAmount: target,
         initialAmount: initial,
-      }, {
-        
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
       });
 
       setName('');
@@ -80,11 +75,12 @@ const SavingsFormPopup: React.FC<Props> = ({
       setInitialAmount('');
       setError('');
       onClose(); 
-    } catch (error: any) {
+    } catch (error) {
       setError('אירעה שגיאה בעת שמירת החיסכון 😞');
-      console.error('שגיאת יצירת יעד:', error?.response?.data || error.message);
+      console.error(error);
     }
   };
+
 
 
   return (
