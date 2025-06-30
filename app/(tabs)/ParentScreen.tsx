@@ -57,9 +57,9 @@ export default function ParentScreen() {
 
   const avatarImages: Record<string, any> = {
     '/avatars/avatar-boy.png': require('../../assets/images/avatars/avatar-boy.png'),
-    '/avatars/avatar-girl.png': require('../../assets/images/avatars/avatar-boy.png'),
+    '/avatars/avatar-girl.png': require('../../assets/images/avatars/avatar-girl.png'),
     '/avatars/avatar-dad.png': require('../../assets/images/avatars/avatar-dad.png'),
-    '/avatars/avatar-mom.png': require('../../assets/images/avatars/avatar-mom.png'),
+    '/avatars/avatar-mom.png': require('../../assets/images/avatars/avatar-mom.png')
   };
 
   const fetchChildren = async () => {
