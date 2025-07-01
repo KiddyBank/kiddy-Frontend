@@ -1,10 +1,11 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableHighlight,
@@ -14,23 +15,35 @@ import {
 import { useAuth } from '../context/auth-context';
 import AllowanceModal from '../popups/allowance-modal';
 import styles from '../styles/parent.styles';
+import TaskModal from '../popups/task-modal';
+import * as SecureStore from 'expo-secure-store';
+
 
 type PaymentRequest = {
   transaction_id: string;
   description: string;
   amount: number;
+  type: string;
   status: 'PENDING_PARENT_APPROVAL';
+  child_balance: {
+    child_user: {
+      username: ReactNode;
+      name: string;
+    };
+  };
 };
+
 
 type Child = {
   name: string;
   balance: number;
-  imageUrl: string;
+  gender: string;
   id: string;
   balanceId: number;
   allowanceAmount?: number;
   allowanceInterval?: 'monthly' | 'weekly' | 'test';
 };
+
 
 export default function ParentScreen() {
   const router = useRouter();
@@ -49,17 +62,10 @@ export default function ParentScreen() {
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
-  const fetchPaymentRequests = async () => {
-    try {
-      const response = await axios.get(
-        `http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children-payment-requests`
-      );
-      setPaymentRequests(response.data);
-    } catch (error) {
-      console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
-      setError('שגיאה בשליפת בקשות של ילדים');
-    }
-  };
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [taskList, setTaskList] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false); 
+
 
   const fetchChildren = async () => {
     try {
@@ -67,7 +73,7 @@ export default function ParentScreen() {
       const converted: Child[] = response.data.map((kid: any) => ({
         id: kid.user_id ?? kid.id,
         name: kid.username ?? kid.name,
-        imageUrl: kid.imageUrl,
+        gender: kid.gender,
         balance: kid.balance,
         balanceId: kid.balanceId,
         allowanceAmount: kid.allowanceAmount,
@@ -80,14 +86,89 @@ export default function ParentScreen() {
     }
   };
 
-  const handlePaymentRequest = async (transactionId: string, action: 'approve' | 'reject') => {
+  const loadData = async () => {
     try {
-      await axios.post(`http://${LOCAL_IP}:3000/users/parents/${sub}/handle-payment-request`, {
-        transactionId,
+      await fetchPaymentRequests();
+      await fetchChildren();
+      await fetchTasks();
+    } catch (err) {
+      console.error('שגיאה בטעינת מסך ההורה:', err);
+      alert('שגיאה בטעינה');
+    }
+  };
+ 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      await loadData();
+      setIsLoading(false);
+    };
+    load();
+  }, []);
+
+  const toChild = () => {
+    router.push('/');
+  };
+
+  //בקשות תשלום
+  const fetchPaymentRequests = async () => {
+    try {
+      const response = await axios.get(
+        `http://${LOCAL_IP}:${LOCAL_PORT}/users/parents/${sub}/children-payment-requests`
+      );
+      setPaymentRequests(response.data);
+    } catch (error) {
+      console.error('❌ שגיאה בשליפת בקשות של ילדים', error);
+      setError('שגיאה בשליפת בקשות של ילדים');
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      const token = await SecureStore.getItemAsync('token');
+
+      const res = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks/by-parent`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setTaskList(res.data);
+    } catch (err) {
+      console.error('שגיאה בשליפת מטלות', err);
+    }
+  };
+
+
+ const handlePaymentRequest = async (
+    transactionId: string,
+    type: string,
+    action: 'approve' | 'reject'
+  ) => {
+    try {
+     const endpoint =
+      type === 'parent_deposit'
+        ? `http://${LOCAL_IP}:3000/child-balance/transactions/approve-deposit/${transactionId}`
+        : `http://${LOCAL_IP}:3000/child-balance/transactions/approve-store/${transactionId}`;
+
+
+      await axios.patch(endpoint, {
+        parentId: sub,
         action,
       });
-      setPaymentRequests((prev) => prev.filter((req) => req.transaction_id !== transactionId));
-      const message = action === 'approve' ? 'בקשה אושרה בהצלחה' : 'הבקשה נדחתה בהצלחה';
+
+      setPaymentRequests((prev) =>
+        prev.filter((req) => req.transaction_id !== transactionId)
+      );
+
+      const message =
+        action === 'approve' ? 'בקשה אושרה בהצלחה' : 'הבקשה נדחתה בהצלחה';
       alert(message);
     } catch (error: any) {
       console.error(`שגיאה בביצוע פעולה (${action})`, error?.response?.data || error.message);
@@ -95,12 +176,22 @@ export default function ParentScreen() {
     }
   };
 
+
+  //דמי כיס
   const openAllowanceModal = (kid: Child) => {
     setSelectedKid(kid);
     setAllowanceAmount(kid.allowanceAmount?.toString() || '');
     setAllowanceInterval(kid.allowanceInterval || 'monthly');
     setShowAllowanceModal(true);
   };
+
+  function intervalToDays(interval: 'monthly' | 'weekly' | 'test'): number {
+    switch (interval) {
+      case 'monthly': return 30;
+      case 'weekly': return 7;
+      case 'test': return 0;
+    }
+  }
 
   const saveAllowance = async () => {
     if (!selectedKid) return;
@@ -133,27 +224,22 @@ export default function ParentScreen() {
     }
   };
 
-  const getIntervalLabel = (value?: string) => {
+  const getIntervalLabel = (value?: string | number) => {
     switch (value) {
-      case 'monthly': return 'חודשי';
-      case 'weekly': return 'שבועי';
-      case 'test': return 'בדיקה';
-      default: return '';
+      case 'monthly':
+      case 30:
+        return 'חודשי';
+      case 'weekly':
+      case 7:
+        return 'שבועי';
+      case 'test':
+      case 0:
+        return 'דקתי';
+      default:
+        return '';
     }
   };
 
-  useEffect(() => {
-    const load = async () => {
-      await fetchPaymentRequests();
-      await fetchChildren();
-      setIsLoading(false);
-    };
-    load();
-  }, []);
-
-  const toChild = () => {
-    router.push('/');
-  };
 
   if (isLoading) {
     return (
@@ -164,20 +250,59 @@ export default function ParentScreen() {
     );
   }
 
+
+  const submitTask = async (taskForm: any) => {
+    try {
+      const token = await SecureStore.getItemAsync('token');
+
+      await axios.post(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks`, {
+        ...taskForm,
+        payment_amount: Number(taskForm.payment_amount),
+        monthly_limit: Number(taskForm.monthly_limit),
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setShowTaskModal(false);
+      fetchTasks();
+      alert('מטלה נוספה');
+    } catch (err) {
+      console.error('שגיאה בהוספת מטלה', err);
+      alert('שגיאה בהוספת מטלה');
+    }
+  };
+
+  const deleteTask = async (taskId: string) => {
+    try {
+      await axios.delete(`http://${LOCAL_IP}:${LOCAL_PORT}/tasks/${taskId}`);
+      fetchTasks();
+    } catch (err) {
+      console.error('שגיאה במחיקת מטלה', err);
+    }
+  };
+
+  
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+
       <View style={styles.headerContainer}>
         <Text style={styles.header}>יתרות הילדים</Text>
       </View>
 
-      <View style={styles.kidsContainer}>
+      <View style={styles.kidsContainer}> 
         {children.map((kid, index) => (
           <View style={styles.kid} key={index}>
             <TouchableOpacity style={styles.allowanceBadge} onPress={() => openAllowanceModal(kid)}>
               {kid.allowanceAmount ? (
                 <View style={styles.allowanceInfo}>
-                  <Text style={styles.allowanceAmount}>{kid.allowanceAmount}₪</Text>
-                  <Text style={styles.allowanceInterval}>{getIntervalLabel(kid.allowanceInterval)}</Text>
+                  <Text style={styles.allowanceAmount}>דמי כיס</Text>
+                  <Text style={styles.allowanceAmount}>{kid.allowanceAmount}₪ {getIntervalLabel(kid.allowanceInterval)}</Text>
                 </View>
               ) : (
                 <Text style={styles.setAllowance}>+ הגדר דמי כיס</Text>
@@ -185,7 +310,14 @@ export default function ParentScreen() {
             </TouchableOpacity>
 
             <TouchableHighlight onPress={toChild}>
-              <Image style={styles.image} source={{ uri: kid.imageUrl }} />
+              <Image
+                style={styles.image}
+                source={
+                  kid.gender === 'female'
+                    ? require('../../assets/images/avatars/avatar-girl.png')
+                    : require('../../assets/images/avatars/avatar-boy.png')
+                }
+              />
             </TouchableHighlight>
 
             <View style={styles.kidDetails}>
@@ -207,27 +339,70 @@ export default function ParentScreen() {
 
         {paymentRequests.map((item) => (
           <View key={item.transaction_id} style={styles.transactionRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.transactionText}>{item.description}</Text>
-              <Text style={styles.transactionAmount}>{item.amount} ₪</Text>
+
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              {item.type === 'parent_deposit' ? (
+                <>
+                  <Text style={styles.titleText}>
+                    {item.child_balance?.child_user?.username} מבקש תשלום של {item.amount}₪
+                  </Text>
+                  <Text style={styles.descriptionText}>
+                    עבור ביצוע מטלת: {item.description}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.titleText}>
+                    {item.child_balance?.child_user?.username} רוצה לחייב {item.amount}₪
+                  </Text>
+                  <Text style={styles.descriptionText}>
+                    הודעת הבקשה: {item.description}
+                  </Text>
+                </>
+              )}
             </View>
 
-            <TouchableOpacity
-              style={[styles.toggleButton, styles.approveButton]}
-              onPress={() => handlePaymentRequest(item.transaction_id, 'approve')}
-            >
-              <Text style={styles.toggleButtonText}>אשר</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.toggleButton, styles.rejectButton]}
-              onPress={() => handlePaymentRequest(item.transaction_id, 'reject')}
-            >
-              <Text style={styles.toggleButtonText}>סרב</Text>
-            </TouchableOpacity>
+            <View style={styles.toggleButtonsContainer}>
+              <TouchableOpacity
+                style={[styles.toggleButton, styles.approveButton]}
+                onPress={() => handlePaymentRequest(item.transaction_id, item.type, 'approve')}>
+                <Text style={styles.toggleButtonText}>✓</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.toggleButton, styles.rejectButton]}
+                onPress={() => handlePaymentRequest(item.transaction_id, item.type, 'reject')}>
+                <Text style={styles.toggleButtonText}>X</Text>
+              </TouchableOpacity>
+            </View>
+
+
           </View>
         ))}
       </View>
+
+      <View style={{ marginTop: 30, width: '90%' }}>
+        <Text style={styles.sectionTitle}>רשימת מטלות</Text>
+        {taskList.map(task => (
+          <View key={task.task_id} style={styles.taskRow}>
+            <View style={styles.taskDetailsContainer}>
+              <Text style={styles.titleText}>רווח של {task.payment_amount}₪ עבור {task.name}</Text>
+              <Text style={styles.descriptionText}>{task.description}</Text>
+              <Text style={styles.descriptionText}>פתוח עבור- {task.child_names.join(', ')}</Text>
+            </View>
+
+            <TouchableOpacity onPress={() => deleteTask(task.task_id)}>
+              <Text style={styles.trashIcon}>🗑️</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+
+      </View>
+      <TouchableOpacity onPress={() => setShowTaskModal(true)} style={styles.addTaskButton}>
+        <Text style={styles.addTaskButtonText}>+ הוסף מטלה</Text>
+      </TouchableOpacity>
+
 
       <AllowanceModal
         visible={showAllowanceModal}
@@ -240,15 +415,15 @@ export default function ParentScreen() {
         setAllowanceInterval={setAllowanceInterval}
         kidName={selectedKid?.name}
       />
+
+      <TaskModal
+        visible={showTaskModal}
+        onClose={() => setShowTaskModal(false)}
+        onSave={submitTask}
+        childrenList={children.map((c) => ({ id: c.id, name: c.name }))}
+      />
+
     </ScrollView>
   );
 }
 
-// Helper to convert interval to days
-function intervalToDays(interval: 'monthly' | 'weekly' | 'test'): number {
-  switch (interval) {
-    case 'monthly': return 30;
-    case 'weekly': return 7;
-    case 'test': return 1;
-  }
-}

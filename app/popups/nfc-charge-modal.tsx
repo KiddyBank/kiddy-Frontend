@@ -13,9 +13,17 @@ interface NfcChargeModalProps {
   visible: boolean;
   transactionId?: string;
   onClose: () => void;
+  onSuccess?: (message: string) => void;
+  transactionAmount?: number;
 }
 
-const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , transactionId}) => {
+const NfcChargeModal: React.FC<NfcChargeModalProps> = ({
+  visible,
+  onClose,
+  transactionId,
+  onSuccess,  
+  transactionAmount       
+}) => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const animation = useRef(new Animated.Value(1)).current;
   const {sub} = useAuth(); 
@@ -70,6 +78,12 @@ const NfcChargeModal: React.FC<NfcChargeModalProps> = ({ visible, onClose , tran
         setTimeout(() => {
           setPaymentSuccess(false);
           playSound();
+          
+          if (onSuccess && transactionAmount !== undefined) {
+            const formattedAmount = transactionAmount.toLocaleString();
+            onSuccess(`נהדר! החיוב בוצע בהצלחה 🎉\nירדו לך ${formattedAmount} ₪ מהיתרה בעקבות הרכישה`);
+          }
+
           onClose();
         }, 3000);
       } else {

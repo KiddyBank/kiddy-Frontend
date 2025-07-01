@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, Button, Modal, Text, TextInput, View } from 'react-native';
 import styles from '../styles/payment-request-modal.styles';
 import Constants from 'expo-constants';
@@ -42,6 +42,13 @@ const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ visible, onCl
     }
   };
 
+  useEffect(() => {
+  if (visible) {
+    setAmount('');
+    setMessage(''); 
+  }
+}, [visible]);
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -76,3 +83,11 @@ const PaymentRequestModal: React.FC<PaymentRequestModalProps> = ({ visible, onCl
 };
 
 export default PaymentRequestModal;
+function setAllowanceInterval(arg0: string) {
+  throw new Error('Function not implemented.');
+}
+
+function setAllowanceAmount(arg0: string) {
+  throw new Error('Function not implemented.');
+}
+

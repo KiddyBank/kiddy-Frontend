@@ -38,13 +38,17 @@ export default StyleSheet.create({
     flexShrink: 1,
   },
   kidBalance: {
-    fontSize: 30,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#3F51B5',
   },
   kidName: {
     fontWeight: 'bold',
     color: '#3F51B5',
+    fontSize: 20,
+    textAlign: 'right',          
+    writingDirection: 'rtl',      
+    alignSelf: 'flex-end',
   },
   image: {
     width: 80,
@@ -61,9 +65,12 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     color: '#3F51B5',
     marginBottom: 10,
+    textAlign: 'right',          
+    writingDirection: 'rtl',      
+    alignSelf: 'flex-end',
   },
   transactionRow: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse', 
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 8,
@@ -71,24 +78,42 @@ export default StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 10,
+    gap: 10,
   },
   transactionText: {
-    flex: 1,
     fontSize: 16,
-    marginRight: 8,
+    textAlign: 'right',
   },
   transactionAmount: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#3F51B5',
+    textAlign: 'right',
     marginHorizontal: 10,
   },
-  toggleButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    marginHorizontal: 4,
+
+  titleText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'right',
   },
+
+  descriptionText: {
+  fontSize: 17,
+  color: '#555',
+  textAlign: 'right',
+  writingDirection: 'rtl',
+},
+
+  toggleButton: {
+  paddingVertical: 6,
+  paddingHorizontal: 6,    
+  borderRadius: 10,          
+  minWidth: 40,
+  alignItems: 'center',
+  shadowColor: '#000',
+},
   approveButton: {
     backgroundColor: 'green',
   },
@@ -141,7 +166,6 @@ export default StyleSheet.create({
   allowanceBadgeText: {
     color: '#3F51B5',
     fontSize: 12,
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   allowanceInfo: {
@@ -149,14 +173,72 @@ export default StyleSheet.create({
   },
   
   allowanceAmount: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 13,
     color: '#3F51B5',
   },
   
-  allowanceInterval: {
-    fontSize: 12,
-    color: '#3F51B5',
+  taskRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
   },
-  
+
+taskDetailsContainer: {
+  flex: 1,
+  alignItems: 'flex-end',
+},
+
+taskName: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#3F51B5',
+  textAlign: 'right',
+  writingDirection: 'rtl',
+},
+
+toggleButtonsContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: 10, 
+  marginTop: 8,
+},
+
+assignedChildrenText: {
+  fontSize: 14,
+  color: '#555',
+  textAlign: 'right',
+  marginTop: 4,
+},
+
+
+addTaskButton: {
+  marginTop: 20,
+  backgroundColor: '#3F51B5',
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  borderRadius: 10,
+  alignItems: 'center',
+  alignSelf: 'center', 
+  minWidth: 140,
+},
+
+addTaskButtonText: {
+  color: 'white',
+  textAlign: 'center',
+  fontWeight: 'bold',
+  fontSize: 16,
+},
+
+trashIcon: {
+  fontSize: 20, 
+  textAlign: 'center',
+  paddingHorizontal: 6,
+},
+
 });
