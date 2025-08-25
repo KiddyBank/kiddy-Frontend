@@ -4,7 +4,7 @@
     "slug": "KiddyBank",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/iconicy.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -12,12 +12,16 @@
       "supportsTablet": true
     },
     "extra": {
-      "LOCAL_IP": "10.100.102.10",
-      "LOCAL_PORT": 3000
+      "LOCAL_IP": "kiddybank.cs.colman.ac.il",
+      "LOCAL_PORT": 3000,
+      "router": {},
+      "eas": {
+        "projectId": "e2b1a56e-e6e5-45b6-a395-631b8b6269f0"
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/iconicy.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.KiddyBank"
@@ -32,7 +36,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/iconicy.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"

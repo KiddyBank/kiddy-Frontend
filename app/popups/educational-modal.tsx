@@ -12,9 +12,13 @@ type EducationalModalProps = {
 const EducationalModal = ({ visible, onClose, contentUrl }: EducationalModalProps) => {
     const video = require('../../assets/videos/whats_money.mp4');
     const player = useVideoPlayer({ assetId: video }, (player) => {
-        player.play();
         player.loop = false;
     });
+
+    const onClosePress = () => {
+        player.pause();
+        onClose();
+    };
 
     if (!visible) return null;
 
@@ -31,7 +35,7 @@ const EducationalModal = ({ visible, onClose, contentUrl }: EducationalModalProp
                         allowsPictureInPicture
                     />
 
-                    <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                    <TouchableOpacity style={styles.closeButton} onPress={onClosePress}>
                         <Ionicons name="checkmark-circle" size={60} color="#4CAF50" />
                         <Text style={styles.closeText}>סיימתי!</Text>
                     </TouchableOpacity>

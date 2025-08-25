@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import Constants from 'expo-constants';
 import { AccountType } from '../(app)/_layout';
 
@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }: Props) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, role, sub, login, logout, loading ,setToken, setRole, setSub}}
+      value={{ token, role, sub, login, logout, loading, setToken, setRole, setSub }}
     >
       {children}
     </AuthContext.Provider>

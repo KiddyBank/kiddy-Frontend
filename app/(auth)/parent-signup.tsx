@@ -23,6 +23,7 @@ export enum Gender {
 interface Child {
   username: string;
   email: string;
+  password: string;
   dateOfBirth: string;
   gender: Gender;
   avatar_path?: string;
@@ -30,7 +31,7 @@ interface Child {
 
 interface ParentForm {
   username: string;
-  lastName: string; 
+  lastName: string;
   email: string;
   password: string;
   dateOfBirth: string;
@@ -45,7 +46,7 @@ export default function ParentSignup() {
 
   const [parentForm, setParentForm] = useState<ParentForm>({
     username: '',
-    lastName: '', 
+    lastName: '',
     email: '',
     password: '',
     dateOfBirth: '',
@@ -57,7 +58,7 @@ export default function ParentSignup() {
   const [childDatePickers, setChildDatePickers] = useState<boolean[]>([]);
 
   const [children, setChildren] = useState<Child[]>([
-    { username: '', email: '', dateOfBirth: '', gender: Gender.OTHER },
+    { username: '', email: '', password: '', dateOfBirth: '', gender: Gender.OTHER },
   ]);
 
   const handleParentChange = (field: keyof ParentForm, value: string) => {
@@ -68,13 +69,13 @@ export default function ParentSignup() {
         genderValue === Gender.FEMALE
           ? '/avatars/avatar-mom.png'
           : genderValue === Gender.MALE
-          ? '/avatars/avatar-dad.png'
-          : undefined;
+            ? '/avatars/avatar-dad.png'
+            : undefined;
 
       setParentForm(prev => ({
         ...prev,
         gender: genderValue,
-        avatar_path, 
+        avatar_path,
       }));
     } else {
       setParentForm(prev => ({ ...prev, [field]: value }));
@@ -110,8 +111,8 @@ export default function ParentSignup() {
         value === Gender.FEMALE
           ? '/avatars/avatar-girl.png'
           : value === Gender.MALE
-          ? '/avatars/avatar-boy.png'
-          : undefined;
+            ? '/avatars/avatar-boy.png'
+            : undefined;
     } else {
       updated[index][field] = value;
     }
@@ -120,7 +121,7 @@ export default function ParentSignup() {
 
 
   const addChild = () => {
-    setChildren([...children, { username: '', email: '', dateOfBirth: '', gender: Gender.OTHER }]);
+    setChildren([...children, { username: '', email: '', password: '', dateOfBirth: '', gender: Gender.OTHER }]);
     setChildDatePickers([...childDatePickers, false]);
   };
 
@@ -189,7 +190,8 @@ export default function ParentSignup() {
         <View key={index} style={styles.childSection}>
           <TextInput placeholder={`שם ילד ${index + 1}`} value={child.username} onChangeText={(v) => handleChildChange(index, 'username', v)} style={styles.input} />
           <TextInput placeholder="אימייל של הילד" value={child.email} onChangeText={(v) => handleChildChange(index, 'email', v)} style={styles.input} keyboardType="email-address" />
-          
+          <TextInput placeholder="סיסמה של הילד" value={child.password} secureTextEntry onChangeText={(v) => handleChildChange(index, 'password', v)} style={styles.input} />
+
           <TouchableOpacity onPress={() => {
             const updated = [...childDatePickers];
             updated[index] = true;
@@ -247,7 +249,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     textAlign: 'right',
-    writingDirection: 'rtl', 
+    writingDirection: 'rtl',
   },
   childSection: {
     marginBottom: 20,

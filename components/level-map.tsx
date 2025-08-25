@@ -206,6 +206,7 @@ const styles = StyleSheet.create({
     content: {
         position: 'relative',
         width: '100%',
+        direction: 'ltr'
     },
     levelContainer: {
         position: 'absolute',

@@ -56,6 +56,7 @@ function TabScreens() {
       <Tabs.Screen
         name="savings"
         options={{
+          href: role === AccountType.CHILD ? "/savings" : null,
           title: 'חיסכון',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="piggybank.fill" color={color} />,
         }}

@@ -28,9 +28,29 @@ export default function LoginDialog() {
       setRole(decoded.role);
       setSub(decoded.sub);
 
-    } catch (err) {
-      console.error('Login error:', err);
-      alert('Login failed');
+    } catch (err: any) {
+      let title = "❌ Login Failed";
+      let message = "";
+
+      if (axios.isAxiosError(err)) {
+        message += `Message: ${err.message}\n`;
+
+        if (err.response) {
+          message += `Status: ${err.response.status}\n`;
+          message += `Data: ${JSON.stringify(err.response.data, null, 2)}\n`;
+        } else if (err.request) {
+          message += "No response received from server.\n";
+        } else {
+          message += "Something went wrong setting up the request.\n";
+        }
+      } else if (err instanceof Error) {
+        message = err.message;
+      } else {
+        message = JSON.stringify(err, null, 2);
+      }
+
+      alert(title + message);
+      throw err;
     }
   };
 

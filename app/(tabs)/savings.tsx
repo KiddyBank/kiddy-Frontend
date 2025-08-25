@@ -62,7 +62,7 @@ const SavingsScreen: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiMessage, setConfettiMessage] = useState('');
 
-  
+
   const LOCAL_IP = Constants.expoConfig?.extra?.LOCAL_IP;
   const LOCAL_PORT = Constants.expoConfig?.extra?.LOCAL_PORT;
 
@@ -87,7 +87,7 @@ const SavingsScreen: React.FC = () => {
     setRefreshing(false);
   };
 
- const fetchBalance = async () => {
+  const fetchBalance = async () => {
     try {
       const token = await SecureStore.getItemAsync('token');
       const res = await axios.get(`http://${LOCAL_IP}:${LOCAL_PORT}/users/balance/${sub}`, {
@@ -95,7 +95,7 @@ const SavingsScreen: React.FC = () => {
       });
 
       setBalance(res.data.balance);
-      setBalanceId(res.data.balance_id); 
+      setBalanceId(res.data.balance_id);
     } catch (err) {
       console.log('שגיאה בשליפת יתרה', err);
     }
@@ -146,7 +146,7 @@ const SavingsScreen: React.FC = () => {
       setTimeout(() => {
         setConfettiMessage('איזה כיף! יש לך מטרה חדשה לחיסכון 🎯');
         setShowConfetti(true);
-        onRefresh(); 
+        onRefresh();
       }, 400);
     } catch (err) {
       console.log('שגיאה ביצירת יעד חדש', err);
@@ -290,7 +290,7 @@ const SavingsScreen: React.FC = () => {
                 <View style={styles.depositRow}>
                   <Text style={styles.depositIcon}>💰</Text>
                   <Text style={styles.depositLabel}>סכום:</Text>
-                  <Text style={styles.depositValue}>{Number(tx.amount ?? 0).toLocaleString()}₪</Text>                
+                  <Text style={styles.depositValue}>{Number(tx.amount ?? 0).toLocaleString()}₪</Text>
                 </View>
                 <View style={styles.depositRow}>
                   <Text style={styles.depositIcon}>📅</Text>
@@ -333,7 +333,7 @@ const SavingsScreen: React.FC = () => {
               setConfettiMessage('כל הכבוד! החיסכון מתקדם 🎯');
               setShowConfetti(true);
               onRefresh();
-            }, 400); 
+            }, 400);
           }}
         />
 

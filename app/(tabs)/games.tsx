@@ -175,7 +175,7 @@ function getYoutubeThumbnail(url: string, quality?: string) {
 
 export default function GameScreen() {
   const [chosenVideosType, setChosenVideosType] = useState(videoTypesChoices[0])
-  const pickerRef = useRef();
+  const pickerRef = useRef(null);
 
   function open() {
     // @ts-ignore
